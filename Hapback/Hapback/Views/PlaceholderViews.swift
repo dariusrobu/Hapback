@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-struct PlaylistsView: View {
-    var body: some View {
-        PlaceholderView(title: "Playlists")
-    }
-}
-
 struct ArtistsView: View {
     var body: some View {
         PlaceholderView(title: "Artists")

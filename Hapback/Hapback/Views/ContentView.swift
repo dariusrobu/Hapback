@@ -9,14 +9,16 @@ import SwiftData
 struct ContentView: View {
     @State private var selectedIndex = 0
     @State private var navigationStack: [MenuDestination] = []
+    @State private var currentItemsCount = 0
+    @State private var playlists: [Playlist] = []
+    private let musicService = MusicLibraryService()
     
     var currentDestination: MenuDestination {
         navigationStack.last ?? .unknown
     }
     
-    var menuItems: [MenuItem] {
+    var homeMenuItems: [MenuItem] {
         let allItems = MenuData.mainMenuItems
-        // Mock condition: Show "Now Playing" if isPlaying is true
         let isPlaying = true 
         if isPlaying {
             return allItems
@@ -42,10 +44,8 @@ struct ContentView: View {
                         // LCD Screen Container
                         VStack(spacing: 0) {
                             if navigationStack.isEmpty {
-                                // Home Menu View
                                 homeMenuView
                             } else {
-                                // Sub-Menu or Content View
                                 destinationView(for: currentDestination)
                             }
                         }
@@ -94,6 +94,9 @@ struct ContentView: View {
                 }
             }
         }
+        .onAppear {
+            updateCount()
+        }
     }
     
     private var homeMenuView: some View {
@@ -128,15 +131,17 @@ struct ContentView: View {
             ScrollViewReader { proxy in
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
-                        ForEach(0..<menuItems.count, id: \.self) { index in
-                            ListItem(item: menuItems[index], isSelected: index == selectedIndex)
+                        ForEach(0..<homeMenuItems.count, id: \.self) { index in
+                            ListItem(item: homeMenuItems[index], isSelected: index == selectedIndex)
                                 .id(index)
                         }
                     }
                 }
                 .onChange(of: selectedIndex) { newIndex in
-                    withAnimation(.linear(duration: 0.1)) {
-                        proxy.scrollTo(newIndex, anchor: .center)
+                    if navigationStack.isEmpty {
+                        withAnimation(.linear(duration: 0.1)) {
+                            proxy.scrollTo(newIndex, anchor: .center)
+                        }
                     }
                 }
             }
@@ -145,70 +150,57 @@ struct ContentView: View {
     
     @ViewBuilder
     private func destinationView(for destination: MenuDestination) -> some View {
-        VStack(spacing: 0) {
-            // Sub-page Header
-            HStack {
-                Spacer()
-                Text(headerTitle(for: destination))
-                    .font(.system(size: 14, weight: .bold))
-                    .kerning(-0.5)
-                Spacer()
-            }
-            .padding(.vertical, 6)
-            .background(Color.white.opacity(0.5))
-            .overlay(
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.15)),
-                alignment: .bottom
-            )
-            
-            switch destination {
-            case .playlists: PlaylistsView()
-            case .artists: ArtistsView()
-            case .albums: AlbumsView()
-            case .songs: SongsView()
-            case .extras: ExtrasView()
-            case .settings: SettingsView()
-            case .nowPlaying: NowPlayingView()
-            default: PlaceholderView(title: "Unknown")
-            }
-        }
-    }
-    
-    private func headerTitle(for destination: MenuDestination) -> String {
         switch destination {
-        case .playlists: return "PLAYLISTS"
-        case .artists: return "ARTISTS"
-        case .albums: return "ALBUMS"
-        case .songs: return "SONGS"
-        case .extras: return "EXTRAS"
-        case .settings: return "SETTINGS"
-        case .nowPlaying: return "NOW PLAYING"
-        default: return "HAPBACK"
+        case .playlists: 
+            PlaylistsView(selectedIndex: $selectedIndex)
+                .onAppear {
+                    self.playlists = musicService.fetchPlaylists()
+                    updateCount()
+                }
+        case .artists: ArtistsView()
+        case .albums: AlbumsView()
+        case .songs: SongsView()
+        case .extras: ExtrasView()
+        case .settings: SettingsView()
+        case .nowPlaying: NowPlayingView()
+        default: PlaceholderView(title: "Unknown")
         }
     }
     
     private func handleRotation(_ direction: Int) {
-        // Rotation only affects the home menu for now
-        if navigationStack.isEmpty {
-            let newIndex = selectedIndex + direction
-            if newIndex >= 0 && newIndex < menuItems.count {
-                selectedIndex = newIndex
-            }
+        let newIndex = selectedIndex + direction
+        if newIndex >= 0 && newIndex < currentItemsCount {
+            selectedIndex = newIndex
         }
     }
     
     private func handleCenterPress() {
         if navigationStack.isEmpty {
-            let destination = menuItems[selectedIndex].destination
+            let destination = homeMenuItems[selectedIndex].destination
             navigationStack.append(destination)
+            selectedIndex = 0
+            updateCount()
         }
     }
     
     private func handleMenuPress() {
         if !navigationStack.isEmpty {
             navigationStack.removeLast()
+            selectedIndex = 0 // Should ideally restore previous index
+            updateCount()
+        }
+    }
+    
+    private func updateCount() {
+        if navigationStack.isEmpty {
+            currentItemsCount = homeMenuItems.count
+        } else {
+            switch currentDestination {
+            case .playlists:
+                currentItemsCount = playlists.count
+            default:
+                currentItemsCount = 0
+            }
         }
     }
 }
