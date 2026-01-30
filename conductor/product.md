@@ -1,7 +1,10 @@
 # Product Definition - Hapback
 
 ## Initial Concept
-Hapback is a native iOS/macOS application built using Swift and SwiftUI. It leverages SwiftData for local data persistence.
+Hapback is a native iOS/macOS application built using Swift and SwiftUI.
+
+## Status
+The foundational iPod Classic (6th Gen) user interface is implemented, including a functional virtual click wheel with haptic and auditory feedback, and basic music library navigation.
 
 ## Vision and Purpose
 Hapback is a dedicated audio player designed to transport users back to the golden era of portable music. It is built for individuals who miss the specific, tactile feeling of owning and using a classic iPod. The goal is to recreate not just the look, but the soul of the device—the physical connection between the user and their music library.
