@@ -7,14 +7,14 @@
 - [~] Task: Conductor - User Manual Verification 'Music Library Expansion' (Protocol in workflow.md)
 
 ## Phase 2: Playlists View UI
-- [ ] Task: Create PlaylistsView Component
-    - [ ] Implement the UI layout in `PlaylistsView.swift` based on the Stitch design.
-    - [ ] Apply the specific backlight color (#d8e9f0) and deep blue selection style.
-    - [ ] Integrate the list with the fetched data from `MusicLibraryService`.
-- [ ] Task: Bind Navigation and Wheel
-    - [ ] Ensure `PlaylistsView` responds to click wheel ticks for selection.
-    - [ ] Implement the center button action to navigate to a placeholder song list.
-- [ ] Task: Conductor - User Manual Verification 'Playlists View UI' (Protocol in workflow.md)
+- [x] Task: Create PlaylistsView Component 2ac1ea1
+    - [x] Implement the UI layout in `PlaylistsView.swift` based on the Stitch design.
+    - [x] Apply the specific backlight color (#d8e9f0) and deep blue selection style.
+    - [x] Integrate the list with the fetched data from `MusicLibraryService`.
+- [x] Task: Bind Navigation and Wheel 2ac1ea1
+    - [x] Ensure `PlaylistsView` responds to click wheel ticks for selection.
+    - [x] Implement the center button action to navigate to a placeholder song list.
+- [~] Task: Conductor - User Manual Verification 'Playlists View UI' (Protocol in workflow.md)
 
 ## Phase 3: Visual Refinement
 - [ ] Task: Refine LCD LCD Border and Typography
