@@ -20,9 +20,9 @@
 - [x] Task: Music Library Service b03adb5
     - [x] Request permissions for Media Library access.
     - [x] Create a service to fetch Songs and Albums.
-- [ ] Task: Core Navigation Menu
-    - [ ] Implement the classic vertical menu (Songs, Artists, Albums).
-    - [ ] Bind menu selection to wheel rotation data.
+- [x] Task: Core Navigation Menu ceb7528
+    - [x] Implement the classic vertical menu (Songs, Artists, Albums).
+    - [x] Bind menu selection to wheel rotation data.
 - [ ] Task: Conductor - User Manual Verification 'Music Library & Navigation' (Protocol in workflow.md)
 
 ## Phase 4: Visual Polishing
