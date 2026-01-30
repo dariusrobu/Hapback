@@ -8,8 +8,12 @@ import SwiftData
 
 struct ContentView: View {
     @State private var selectedIndex = 0
-    // Use the dynamic menu items instead of static string array
-    // Filter out "Now Playing" based on a mock condition for now
+    @State private var navigationStack: [MenuDestination] = []
+    
+    var currentDestination: MenuDestination {
+        navigationStack.last ?? .unknown
+    }
+    
     var menuItems: [MenuItem] {
         let allItems = MenuData.mainMenuItems
         // Mock condition: Show "Now Playing" if isPlaying is true
@@ -26,7 +30,7 @@ struct ContentView: View {
             ZStack {
                 // Glossy Polycarbonate Background
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.white, Color(white: 0.94), Color(white: 0.90)]),
+                    gradient: Gradient(colors: [Color.white, Color(white: 0.96), Color(white: 0.92)]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -37,47 +41,12 @@ struct ContentView: View {
                     VStack {
                         // LCD Screen Container
                         VStack(spacing: 0) {
-                            // Header Bar
-                            HStack {
-                                Image(systemName: "play.fill")
-                                    .font(.system(size: 12))
-                                    .frame(width: 20, alignment: .leading)
-                                
-                                Spacer()
-                                Text("Hapback") // Title from Stitch Design
-                                    .font(.system(size: 16, weight: .bold))
-                                    .kerning(-0.5)
-                                Spacer()
-                                
-                                Image(systemName: "battery.75")
-                                    .font(.system(size: 14))
-                                    .frame(width: 20, alignment: .trailing)
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.white.opacity(0.5))
-                            .overlay(
-                                Rectangle()
-                                    .frame(height: 1)
-                                    .foregroundColor(Color.black.opacity(0.15)),
-                                alignment: .bottom
-                            )
-                            
-                            // List Content
-                            ScrollViewReader { proxy in
-                                ScrollView(showsIndicators: false) {
-                                    VStack(spacing: 0) {
-                                        ForEach(0..<menuItems.count, id: \.self) { index in
-                                            ListItem(item: menuItems[index], isSelected: index == selectedIndex)
-                                                .id(index)
-                                        }
-                                    }
-                                }
-                                .onChange(of: selectedIndex) { newIndex in
-                                    withAnimation(.linear(duration: 0.1)) {
-                                        proxy.scrollTo(newIndex, anchor: .center)
-                                    }
-                                }
+                            if navigationStack.isEmpty {
+                                // Home Menu View
+                                homeMenuView
+                            } else {
+                                // Sub-Menu or Content View
+                                destinationView(for: currentDestination)
                             }
                         }
                         .background(
@@ -88,7 +57,6 @@ struct ContentView: View {
                             )
                         )
                         .cornerRadius(6)
-                        // LCD Inner Shadow
                         .overlay(
                             RoundedRectangle(cornerRadius: 6)
                                 .stroke(Color.black.opacity(0.2), lineWidth: 1)
@@ -109,9 +77,17 @@ struct ContentView: View {
                     
                     // Wheel Area (Bottom 50%)
                     ZStack {
-                        ClickWheelView { direction in
-                            handleRotation(direction)
-                        }
+                        ClickWheelView(
+                            onTick: { direction in
+                                handleRotation(direction)
+                            },
+                            onCenterPress: {
+                                handleCenterPress()
+                            },
+                            onMenuPress: {
+                                handleMenuPress()
+                            }
+                        )
                         .frame(width: 280, height: 300)
                     }
                     .frame(height: outerGeometry.size.height * 0.5)
@@ -120,10 +96,119 @@ struct ContentView: View {
         }
     }
     
+    private var homeMenuView: some View {
+        VStack(spacing: 0) {
+            // Header Bar
+            HStack {
+                Image(systemName: "play.fill")
+                    .font(.system(size: 10))
+                    .frame(width: 20, alignment: .leading)
+                
+                Spacer()
+                Text("Hapback")
+                    .font(.system(size: 14, weight: .bold))
+                    .kerning(-0.5)
+                Spacer()
+                
+                Image(systemName: "battery.75")
+                    .font(.system(size: 12))
+                    .frame(width: 20, alignment: .trailing)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.white.opacity(0.5))
+            .overlay(
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(Color.black.opacity(0.15)),
+                alignment: .bottom
+            )
+            
+            // List Content
+            ScrollViewReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        ForEach(0..<menuItems.count, id: \.self) { index in
+                            ListItem(item: menuItems[index], isSelected: index == selectedIndex)
+                                .id(index)
+                        }
+                    }
+                }
+                .onChange(of: selectedIndex) { newIndex in
+                    withAnimation(.linear(duration: 0.1)) {
+                        proxy.scrollTo(newIndex, anchor: .center)
+                    }
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func destinationView(for destination: MenuDestination) -> some View {
+        VStack(spacing: 0) {
+            // Sub-page Header
+            HStack {
+                Spacer()
+                Text(headerTitle(for: destination))
+                    .font(.system(size: 14, weight: .bold))
+                    .kerning(-0.5)
+                Spacer()
+            }
+            .padding(.vertical, 6)
+            .background(Color.white.opacity(0.5))
+            .overlay(
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(Color.black.opacity(0.15)),
+                alignment: .bottom
+            )
+            
+            switch destination {
+            case .playlists: PlaylistsView()
+            case .artists: ArtistsView()
+            case .albums: AlbumsView()
+            case .songs: SongsView()
+            case .extras: ExtrasView()
+            case .settings: SettingsView()
+            case .nowPlaying: NowPlayingView()
+            default: PlaceholderView(title: "Unknown")
+            }
+        }
+    }
+    
+    private func headerTitle(for destination: MenuDestination) -> String {
+        switch destination {
+        case .playlists: return "PLAYLISTS"
+        case .artists: return "ARTISTS"
+        case .albums: return "ALBUMS"
+        case .songs: return "SONGS"
+        case .extras: return "EXTRAS"
+        case .settings: return "SETTINGS"
+        case .nowPlaying: return "NOW PLAYING"
+        default: return "HAPBACK"
+        }
+    }
+    
     private func handleRotation(_ direction: Int) {
-        let newIndex = selectedIndex + direction
-        if newIndex >= 0 && newIndex < menuItems.count {
-            selectedIndex = newIndex
+        // Rotation only affects the home menu for now
+        if navigationStack.isEmpty {
+            let newIndex = selectedIndex + direction
+            if newIndex >= 0 && newIndex < menuItems.count {
+                selectedIndex = newIndex
+            }
+        }
+    }
+    
+    private func handleCenterPress() {
+        if navigationStack.isEmpty {
+            let destination = menuItems[selectedIndex].destination
+            navigationStack.append(destination)
+        }
+    }
+    
+    private func handleMenuPress() {
+        if !navigationStack.isEmpty {
+            navigationStack.removeLast()
         }
     }
 }

@@ -12,6 +12,8 @@ struct ClickWheelView: View {
     @State private var rotation: Double = 0
     
     var onTick: ((Int) -> Void)?
+    var onCenterPress: (() -> Void)?
+    var onMenuPress: (() -> Void)?
     
     // Design constants from HTML
     private let wheelBackground = Color(red: 245/255, green: 245/255, blue: 247/255) // #f5f5f7
@@ -38,38 +40,51 @@ struct ClickWheelView: View {
                     .shadow(color: .black.opacity(0.1), radius: 15, x: 0, y: 10)
                 
                 // Center Button (32% size)
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [.white, Color(white: 0.95)]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                Button(action: {
+                    onCenterPress?()
+                }) {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.white, Color(white: 0.95)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                    )
-                    .frame(width: geometry.size.width * 0.32, height: geometry.size.width * 0.32)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
-                    )
-                    // Subtle inner shadow for the button
-                    .overlay(
-                        Circle()
-                            .stroke(Color.black.opacity(0.05), lineWidth: 2)
-                            .blur(radius: 2)
-                            .offset(x: 0, y: 1)
-                            .mask(Circle())
-                    )
-                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                        .overlay(
+                            Circle()
+                                .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
+                        )
+                        // Subtle inner shadow for the button
+                        .overlay(
+                            Circle()
+                                .stroke(Color.black.opacity(0.05), lineWidth: 2)
+                                .blur(radius: 2)
+                                .offset(x: 0, y: 1)
+                                .mask(Circle())
+                        )
+                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .frame(width: geometry.size.width * 0.32, height: geometry.size.width * 0.32)
+                .zIndex(20) // Ensure it's above the gesture area if needed, though gestures usually capture first
                 
                 // Menu Text (Top 10%)
                 VStack {
-                    Text("MENU")
-                        .font(.system(size: 14, weight: .bold))
-                        .kerning(2.0) // tracking-[0.2em]
-                        .foregroundColor(iconColor)
-                        .padding(.top, geometry.size.height * 0.1)
+                    Button(action: {
+                        onMenuPress?()
+                    }) {
+                        Text("MENU")
+                            .font(.system(size: 14, weight: .bold))
+                            .kerning(2.0) // tracking-[0.2em]
+                            .foregroundColor(iconColor)
+                            .padding(.top, geometry.size.height * 0.1)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(PlainButtonStyle())
                     Spacer()
                 }
+                .zIndex(15)
                 
                 // Play/Pause (Bottom 10%)
                 VStack {
@@ -103,7 +118,7 @@ struct ClickWheelView: View {
                 }
             }
             .gesture(
-                DragGesture()
+                DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         let angle = viewModel.angle(for: value.location, in: geometry.size)
                         self.rotation = angle
