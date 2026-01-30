@@ -93,7 +93,9 @@ struct ContentView: View {
                 }
             }
         }
-        .onAppear {
+        .task {
+            // Request permissions at startup to avoid crashes later
+            _ = await musicService.requestAuthorization()
             updateCount()
         }
     }
@@ -176,8 +178,11 @@ struct ContentView: View {
                     updateCount()
                 }
         case .songs: 
-            PlaceholderView(title: "Songs")
-                .onAppear { updateCount() }
+            SongsView(selectedIndex: $selectedIndex, songs: songs)
+                .task {
+                    self.songs = await musicService.fetchSongs()
+                    updateCount()
+                }
         case .extras: 
             PlaceholderView(title: "Extras")
                 .onAppear { updateCount() }
@@ -208,6 +213,13 @@ struct ContentView: View {
                 selectedIndex = 0
                 updateCount()
             }
+        } else if currentDestination == .songs && !songs.isEmpty {
+            // Start playback logic would go here
+            withAnimation {
+                navigationStack.append(.nowPlaying)
+                selectedIndex = 0
+                updateCount()
+            }
         }
     }
     
@@ -232,6 +244,8 @@ struct ContentView: View {
                 currentItemsCount = artists.count
             case .albums:
                 currentItemsCount = albums.count
+            case .songs:
+                currentItemsCount = songs.count
             default:
                 currentItemsCount = 0
             }

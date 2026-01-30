@@ -8,38 +8,52 @@
 import Foundation
 import MediaPlayer
 
+@MainActor
 class MusicLibraryService {
     
     func requestAuthorization() async -> MPMediaLibraryAuthorizationStatus {
         return await MPMediaLibrary.requestAuthorization()
     }
     
-    func fetchSongs() -> [MPMediaItem] {
+    func fetchSongs() async -> [Song] {
         let query = MPMediaQuery.songs()
-        return query.items ?? []
+        let items = query.items ?? []
+        var songs: [Song] = []
+        for item in items {
+            songs.append(Song(from: item))
+        }
+        return songs
     }
     
     func fetchAlbums() async -> [Album] {
-        return await Task.detached(priority: .userInitiated) {
-            let query = MPMediaQuery.albums()
-            let collections = query.collections ?? []
-            return collections.map { Album(from: $0) }
-        }.value
+        let query = MPMediaQuery.albums()
+        let collections = query.collections ?? []
+        var albums: [Album] = []
+        for collection in collections {
+            albums.append(Album(from: collection))
+        }
+        return albums
     }
 
     func fetchPlaylists() async -> [Playlist] {
-        return await Task.detached(priority: .userInitiated) {
-            let query = MPMediaQuery.playlists()
-            let collections = query.collections ?? []
-            return collections.compactMap { $0 as? MPMediaPlaylist }.map { Playlist(from: $0) }
-        }.value
+        let query = MPMediaQuery.playlists()
+        let collections = query.collections ?? []
+        var playlists: [Playlist] = []
+        for collection in collections {
+            if let mediaPlaylist = collection as? MPMediaPlaylist {
+                playlists.append(Playlist(from: mediaPlaylist))
+            }
+        }
+        return playlists
     }
 
     func fetchArtists() async -> [Artist] {
-        return await Task.detached(priority: .userInitiated) {
-            let query = MPMediaQuery.artists()
-            let collections = query.collections ?? []
-            return collections.map { Artist(from: $0) }
-        }.value
+        let query = MPMediaQuery.artists()
+        let collections = query.collections ?? []
+        var artists: [Artist] = []
+        for collection in collections {
+            artists.append(Artist(from: collection))
+        }
+        return artists
     }
 }
