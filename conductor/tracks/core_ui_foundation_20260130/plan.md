@@ -14,7 +14,7 @@
     - [x] Set up `HapticManager` using Core Haptics.
     - [x] Set up `AudioManager` for click sound effects.
     - [x] Integrate feedback with wheel rotation increments.
-- [ ] Task: Conductor - User Manual Verification 'Click Wheel Interaction' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Click Wheel Interaction' (Protocol in workflow.md)
 
 ## Phase 3: Music Library & Navigation
 - [ ] Task: Music Library Service
