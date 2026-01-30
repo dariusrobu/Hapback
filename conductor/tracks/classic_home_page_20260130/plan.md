@@ -7,10 +7,10 @@
 - [~] Task: Conductor - User Manual Verification 'Data Models & Scaffolding' (Protocol in workflow.md)
 
 ## Phase 2: Home Page UI Implementation
-- [ ] Task: Update ContentView Layout
-    - [ ] Refactor `ContentView` to use the `MenuItem` model.
-    - [ ] Ensure the "Now Playing" item is conditionally shown (mock the condition for now).
-    - [ ] Apply the specific visual styles from the specification (header, gradient background, list styling).
+- [x] Task: Update ContentView Layout 0bdc04c
+    - [x] Refactor `ContentView` to use the `MenuItem` model.
+    - [x] Ensure the "Now Playing" item is conditionally shown (mock the condition for now).
+    - [x] Apply the specific visual styles from the specification (header, gradient background, list styling).
 - [ ] Task: Implement Navigation Logic
     - [ ] Set up a `NavigationStack` or custom view switcher driven by the `ClickWheelView` selection.
     - [ ] Create placeholder views for each menu destination (Playlists, Artists, etc.).
