@@ -208,9 +208,15 @@ struct ContentView: View {
     }
     
     private func handleRotation(_ direction: Int) {
-        let newIndex = selectedIndex + direction
-        if newIndex >= 0 && newIndex < currentItemsCount {
-            selectedIndex = newIndex
+        if navigationStack.isEmpty || currentDestination != .nowPlaying {
+            let newIndex = selectedIndex + direction
+            if newIndex >= 0 && newIndex < currentItemsCount {
+                selectedIndex = newIndex
+            }
+        } else if currentDestination == .nowPlaying {
+            // Adjust volume: each tick is ~2% volume change
+            let delta = Double(direction) * 0.02
+            PlaybackManager.shared.adjustVolume(by: delta)
         }
     }
     

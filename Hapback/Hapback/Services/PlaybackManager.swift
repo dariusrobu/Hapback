@@ -83,6 +83,13 @@ class PlaybackManager: ObservableObject {
         player?.seek(to: .zero)
     }
     
+    func adjustVolume(by delta: Double) {
+        let musicPlayer = MPMusicPlayerController.applicationMusicPlayer
+        let currentVolume = musicPlayer.volume
+        let newVolume = max(0, min(1.0, currentVolume + Float(delta)))
+        musicPlayer.volume = newVolume
+    }
+    
     private func addTimeObserver() {
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
