@@ -11,9 +11,9 @@
     - [x] Refactor `ContentView` to use the `MenuItem` model.
     - [x] Ensure the "Now Playing" item is conditionally shown (mock the condition for now).
     - [x] Apply the specific visual styles from the specification (header, gradient background, list styling).
-- [ ] Task: Implement Navigation Logic
-    - [ ] Set up a `NavigationStack` or custom view switcher driven by the `ClickWheelView` selection.
-    - [ ] Create placeholder views for each menu destination (Playlists, Artists, etc.).
+- [x] Task: Implement Navigation Logic c9aa569
+    - [x] Set up a `NavigationStack` or custom view switcher driven by the `ClickWheelView` selection.
+    - [x] Create placeholder views for each menu destination (Playlists, Artists, etc.).
 - [ ] Task: Conductor - User Manual Verification 'Home Page UI Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Click Wheel Integration & Polish
