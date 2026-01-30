@@ -27,13 +27,21 @@ struct ClickWheelView: View {
                         Circle()
                             .stroke(Color.gray.opacity(0.3), lineWidth: 2) // border-gray-200
                     )
-                    .shadow(color: .black.opacity(0.1), radius: 15, x: 0, y: 10) // click-wheel-shadow approx
+                    // Inset shadow simulation
+                    .overlay(
+                        Circle()
+                            .stroke(Color.black.opacity(0.05), lineWidth: 4)
+                            .blur(radius: 4)
+                            .offset(x: 0, y: 2)
+                            .mask(Circle())
+                    )
+                    .shadow(color: .black.opacity(0.1), radius: 15, x: 0, y: 10)
                 
                 // Center Button (32% size)
                 Circle()
                     .fill(
                         LinearGradient(
-                            gradient: Gradient(colors: [.white, Color(white: 0.98)]),
+                            gradient: Gradient(colors: [.white, Color(white: 0.95)]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -41,9 +49,17 @@ struct ClickWheelView: View {
                     .frame(width: geometry.size.width * 0.32, height: geometry.size.width * 0.32)
                     .overlay(
                         Circle()
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                            .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
                     )
-                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    // Subtle inner shadow for the button
+                    .overlay(
+                        Circle()
+                            .stroke(Color.black.opacity(0.05), lineWidth: 2)
+                            .blur(radius: 2)
+                            .offset(x: 0, y: 1)
+                            .mask(Circle())
+                    )
+                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                 
                 // Menu Text (Top 10%)
                 VStack {
