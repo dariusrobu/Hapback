@@ -25,26 +25,6 @@ struct SettingsView: View {
     }
 }
 
-struct NowPlayingView: View {
-    var body: some View {
-        VStack {
-            Text("Now Playing")
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(.black)
-            
-            Image(systemName: "music.note")
-                .font(.system(size: 100))
-                .foregroundColor(.gray)
-                .padding()
-            
-            Text("No song playing")
-                .font(.headline)
-                .foregroundColor(.gray)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
 struct PlaceholderView: View {
     let title: String
     

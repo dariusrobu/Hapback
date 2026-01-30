@@ -214,12 +214,15 @@ struct ContentView: View {
                 updateCount()
             }
         } else if currentDestination == .songs && !songs.isEmpty {
-            // Start playback logic would go here
+            let song = songs[selectedIndex]
+            PlaybackManager.shared.play(song)
             withAnimation {
                 navigationStack.append(.nowPlaying)
                 selectedIndex = 0
                 updateCount()
             }
+        } else if currentDestination == .nowPlaying {
+            PlaybackManager.shared.togglePlayPause()
         }
     }
     
