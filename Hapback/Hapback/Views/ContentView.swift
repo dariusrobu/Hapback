@@ -6,24 +6,27 @@
 import SwiftUI
 import SwiftData
 
-//
-//  ContentView.swift
-//  Hapback
-//
-
-import SwiftUI
-import SwiftData
-
 struct ContentView: View {
     @State private var selectedIndex = 0
-    let menuItems = ["Bohemian Rhapsody", "Come Together", "Stairway to Heaven", "Starman", "Time"]
+    // Use the dynamic menu items instead of static string array
+    // Filter out "Now Playing" based on a mock condition for now
+    var menuItems: [MenuItem] {
+        let allItems = MenuData.mainMenuItems
+        // Mock condition: Show "Now Playing" if isPlaying is true
+        let isPlaying = true 
+        if isPlaying {
+            return allItems
+        } else {
+            return allItems.filter { $0.destination != .nowPlaying }
+        }
+    }
     
     var body: some View {
         GeometryReader { outerGeometry in
             ZStack {
                 // Glossy Polycarbonate Background
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.white, Color(white: 0.96), Color(white: 0.92)]),
+                    gradient: Gradient(colors: [Color.white, Color(white: 0.94), Color(white: 0.90)]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -37,14 +40,18 @@ struct ContentView: View {
                             // Header Bar
                             HStack {
                                 Image(systemName: "play.fill")
-                                    .font(.system(size: 10))
+                                    .font(.system(size: 12))
+                                    .frame(width: 20, alignment: .leading)
+                                
                                 Spacer()
-                                Text("SONGS")
-                                    .font(.system(size: 14, weight: .bold))
+                                Text("Hapback") // Title from Stitch Design
+                                    .font(.system(size: 16, weight: .bold))
                                     .kerning(-0.5)
                                 Spacer()
+                                
                                 Image(systemName: "battery.75")
-                                    .font(.system(size: 12))
+                                    .font(.system(size: 14))
+                                    .frame(width: 20, alignment: .trailing)
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -61,7 +68,7 @@ struct ContentView: View {
                                 ScrollView(showsIndicators: false) {
                                     VStack(spacing: 0) {
                                         ForEach(0..<menuItems.count, id: \.self) { index in
-                                            ListItem(text: menuItems[index], isSelected: index == selectedIndex)
+                                            ListItem(item: menuItems[index], isSelected: index == selectedIndex)
                                                 .id(index)
                                         }
                                     }
@@ -122,16 +129,19 @@ struct ContentView: View {
 }
 
 struct ListItem: View {
-    let text: String
+    let item: MenuItem
     var isSelected: Bool = false
     
     var body: some View {
         HStack {
-            Text(text)
+            Text(item.title)
                 .font(.system(size: 18, weight: .bold))
                 .kerning(-0.5)
                 .foregroundColor(isSelected ? .white : .black)
             Spacer()
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(isSelected ? .white : .black.opacity(0.6))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -143,10 +153,6 @@ struct ListItem: View {
             alignment: .bottom
         )
     }
-}
-
-#Preview {
-    ContentView()
 }
 
 #Preview {
