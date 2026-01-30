@@ -12,6 +12,12 @@ import Combine
 @MainActor
 class ClickWheelViewModel: ObservableObject {
     
+    private let hapticManager = HapticManager()
+    private let audioManager = AudioManager()
+    
+    private var lastAngle: Double = 0
+    private let feedbackThreshold: Double = 15 // Degrees of rotation to trigger a click
+    
     /// Calculates the angle in degrees relative to the center of a given size.
     /// 0 degrees is at 3 o'clock, -90 degrees is at 12 o'clock.
     func angle(for point: CGPoint, in size: CGSize) -> Double {
@@ -20,6 +26,17 @@ class ClickWheelViewModel: ObservableObject {
         let deltaY = point.y - center.y
         
         let radians = atan2(deltaY, deltaX)
-        return radians * 180 / .pi
+        let degrees = radians * 180 / .pi
+        
+        // Handle feedback generation
+        // Calculate delta from last processed angle to check threshold
+        let delta = abs(degrees - lastAngle)
+        if delta > feedbackThreshold {
+            hapticManager.playClick()
+            audioManager.playClick()
+            lastAngle = degrees
+        }
+        
+        return degrees
     }
 }
