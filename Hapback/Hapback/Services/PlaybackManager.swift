@@ -40,8 +40,8 @@ class PlaybackManager: ObservableObject {
         player?.pause()
         removeTimeObserver()
         
-        guard let url = song.mediaItem.assetURL else {
-            print("Song has no asset URL")
+        guard let url = song.fileURL else {
+            print("Song has no URL for playback")
             return
         }
         
@@ -55,7 +55,17 @@ class PlaybackManager: ObservableObject {
         }
         
         currentSong = song
-        duration = song.mediaItem.playbackDuration
+        // Duration from media item if available, otherwise from asset
+        if let mediaItem = song.mediaItem {
+            duration = mediaItem.playbackDuration
+        } else {
+            // Task to load duration from asset if not available
+            Task {
+                if let duration = try? await asset.load(.duration) {
+                    self.duration = duration.seconds
+                }
+            }
+        }
         
         player?.play()
         isPlaying = true
@@ -84,17 +94,20 @@ class PlaybackManager: ObservableObject {
     }
     
     func adjustVolume(by delta: Double) {
-        let musicPlayer = MPMusicPlayerController.applicationMusicPlayer
-        let currentVolume = musicPlayer.volume
-        let newVolume = max(0, min(1.0, currentVolume + Float(delta)))
-        musicPlayer.volume = newVolume
+        guard let player = player else { return }
+        let currentVolume = Double(player.volume)
+        let newVolume = max(0, min(1.0, currentVolume + delta))
+        player.volume = Float(newVolume)
     }
     
     private func addTimeObserver() {
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             guard let self = self else { return }
-            self.currentTime = time.seconds
+            // Ensure mutation happens on main actor
+            Task { @MainActor in
+                self.currentTime = time.seconds
+            }
         }
     }
     

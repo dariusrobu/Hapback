@@ -7,15 +7,23 @@
 
 import Foundation
 import MediaPlayer
+import UIKit
 
 struct Artist: Identifiable {
-    let id: MPMediaEntityPersistentID
+    let id: String
     let name: String
-    let artwork: MPMediaItemArtwork?
+    let artwork: UIImage?
     
+    @MainActor
     init(from mediaItemCollection: MPMediaItemCollection) {
-        self.id = mediaItemCollection.representativeItem?.artistPersistentID ?? 0
+        self.id = String(mediaItemCollection.representativeItem?.artistPersistentID ?? 0)
         self.name = mediaItemCollection.representativeItem?.artist ?? "Unknown Artist"
-        self.artwork = mediaItemCollection.representativeItem?.artwork
+        self.artwork = mediaItemCollection.representativeItem?.artwork?.image(at: CGSize(width: 600, height: 600))
+    }
+    
+    init(id: String, name: String, artwork: UIImage?) {
+        self.id = id
+        self.name = name
+        self.artwork = artwork
     }
 }

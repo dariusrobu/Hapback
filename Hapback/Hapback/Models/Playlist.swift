@@ -14,6 +14,7 @@ struct Playlist: Identifiable {
     let isSmart: Bool
     let items: [MPMediaItem]
     
+    @MainActor
     init(from mediaPlaylist: MPMediaPlaylist) {
         self.id = mediaPlaylist.persistentID
         self.title = mediaPlaylist.name ?? "Unknown Playlist"

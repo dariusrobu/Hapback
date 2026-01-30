@@ -9,6 +9,7 @@ import XCTest
 @testable import Hapback
 import SwiftUI
 
+@MainActor
 final class HomeUITests: XCTestCase {
 
     func testContentViewInitialization() {

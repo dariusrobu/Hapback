@@ -9,6 +9,7 @@ import XCTest
 @testable import Hapback
 import MediaPlayer
 
+@MainActor
 final class MusicServiceTests: XCTestCase {
 
     func testServiceInitialization() {
@@ -17,26 +18,20 @@ final class MusicServiceTests: XCTestCase {
     }
     
     func testPermissionRequest() async {
-        // We can't easily mock MPMediaLibrary authorization status in unit tests without extensive mocking.
-        // For now, we verify the service has the method signature we expect.
         let service = MusicLibraryService()
         let status = await service.requestAuthorization()
-        // In a simulator/test environment, this might return .notDetermined or .denied if info.plist isn't set up yet.
-        // We just want to ensure it returns a valid status type.
         XCTAssertTrue(status == .authorized || status == .denied || status == .notDetermined || status == .restricted)
     }
 
-    func testFetchPlaylists() {
+    func testFetchPlaylists() async {
         let service = MusicLibraryService()
-        let playlists: [Playlist] = service.fetchPlaylists()
-        // We expect this to return an array (empty or not)
+        let playlists: [Playlist] = await service.fetchPlaylists()
         XCTAssertNotNil(playlists)
     }
 
-    func testFetchArtists() {
+    func testFetchArtists() async {
         let service = MusicLibraryService()
-        let artists: [Artist] = service.fetchArtists()
-        // We expect this to return an array
+        let artists: [Artist] = await service.fetchArtists()
         XCTAssertNotNil(artists)
     }
 }

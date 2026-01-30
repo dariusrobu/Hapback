@@ -9,14 +9,13 @@ import XCTest
 @testable import Hapback
 import SwiftUI
 
+@MainActor
 final class NavigationTests: XCTestCase {
 
     func testPlaceholderViewsExistence() {
-        // Just verify that the placeholder views we are about to create exist
-        // This test will fail initially because the views don't exist
-        let playlists = PlaylistsView()
-        let artists = ArtistsView()
-        let albums = AlbumsView()
+        let playlists = PlaylistsView(selectedIndex: .constant(0), playlists: [])
+        let artists = ArtistsView(selectedIndex: .constant(0), artists: [])
+        let albums = AlbumsView(selectedIndex: .constant(0), albums: [])
         let songs = SongsView()
         let extras = ExtrasView()
         let settings = SettingsView()

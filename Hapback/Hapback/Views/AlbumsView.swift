@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MediaPlayer
 
 struct AlbumsView: View {
     @Binding var selectedIndex: Int
@@ -69,14 +70,15 @@ struct AlbumListItem: View {
     var body: some View {
         HStack(spacing: 12) {
             // Album Artwork Thumbnail
-            if let artwork = album.artwork, let image = artwork.image(at: CGSize(width: 40, height: 40)) {
+            if let image = album.artwork {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 40, height: 40)
                     .cornerRadius(2)
                     .shadow(radius: 1)
-            } else {
+            }
+            else {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 40, height: 40)

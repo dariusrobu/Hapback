@@ -44,7 +44,7 @@ struct NowPlayingView: View {
                     // Artwork and Metadata
                     HStack(alignment: .center, spacing: 16) {
                         // Album Artwork
-                        if let artwork = song.artwork, let image = artwork.image(at: CGSize(width: 128, height: 128)) {
+                        if let image = song.artwork {
                             Image(uiImage: image)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)

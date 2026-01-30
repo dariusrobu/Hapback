@@ -11,4 +11,5 @@
 *   **Haptics:** Core Haptics (for high-precision tactile feedback)
 *   **Audio:** AVFoundation (for authentic click sounds and music playback)
 *   **Navigation:** Custom State-Driven Navigation Stack (to mimic physical device behavior)
+*   **Local Files:** AVAsset metadata extraction for offline-first playback support
 *   **Music Integration:** MusicKit / Spotify iOS SDK

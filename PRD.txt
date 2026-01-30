@@ -1,0 +1,50 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Project Name: Hapback
+Version: 1.0
+Status: Draft
+
+1. PRODUCT VISION
+To provide a focused, offline-first music experience that honors the tactile legacy of the 2000s. Hapback transforms the modern iPhone into a dedicated high-fidelity music player using a haptic-driven virtual click wheel.
+2. TARGET AUDIENCE
+Nostalgia Seekers: Users wanting to relive the physical sensation of the click-wheel era.
+Digital Minimalists: Users looking for a distraction-free, offline music environment.
+Audiophiles: Users who manage their own high-quality local file libraries (FLAC/ALAC).
+3. FUNCTIONAL REQUIREMENTS
+3.1 The Virtual Click Wheel
+Rotary Tracking: The UI must track circular touch movements to scroll through lists.
+Haptic Mapping: Integration with the iOS Taptic Engine to provide a "click" sensation for every list item passed.
+Button Quadrants:
+Menu: Navigates back one level.
+Play/Pause: Global toggle for audio.
+Forward/Back: Track skipping or fast-forwarding on long-press.
+Center Select: Confirms selection or toggles "Scrub Mode" during playback.
+3.2 Library Management
+Local Storage: Files must be stored within the app sandbox to allow for 100% offline use.
+Import Sources: * Support for iOS Files App (Local/iCloud Drive).
+AirDrop support for individual song transfers.
+Metadata Engine: Automatic parsing of ID3 tags (Artist, Album, Year, Genre, and High-Res Album Art).
+3.3 Audio Playback
+Format Support: MP3, AAC, ALAC, WAV, and AIFF.
+Gapless Playback: Seamless transition between tracks (essential for live albums and concept records).
+Background Audio: Integration with iOS Control Center and Lock Screen.
+4. TECHNICAL SPECIFICATIONS
+Component
+Requirement
+Platform
+iOS 16.0+
+Primary Language
+Swift
+UI Framework
+SwiftUI (Layout) + UIKit (Gesture Recognition)
+Haptics API
+Core Haptics (CHHapticEngine)
+Database
+Core Data (for music indexing)
+Export to Sheets
+5. USER INTERFACE (UI) DESIGN
+The "LCD" Screen: The top 40% of the app should mimic a classic display with a hierarchical menu system.
+The Wheel: The bottom 60% features the interactive wheel.
+Dynamic Themes: Support for "Classic White," "Stealth Black," and "U2 Red/Black" skins.
+6. CONSTRAINTS & COMPLIANCE
+Legal: The app will not provide music; it is a tool for playing user-owned files.
+IP Protection: UI design must remain distinct enough from Apple’s hardware "Trade Dress" to pass App Store Review 5.2.2.

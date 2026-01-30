@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var playlists: [Playlist] = []
     @State private var artists: [Artist] = []
     @State private var albums: [Album] = []
+    @State private var songs: [Song] = []
     private let musicService = MusicLibraryService()
     
     var currentDestination: MenuDestination {
