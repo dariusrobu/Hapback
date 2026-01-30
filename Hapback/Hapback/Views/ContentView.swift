@@ -85,6 +85,15 @@ struct ContentView: View {
                             },
                             onMenuPress: {
                                 handleMenuPress()
+                            },
+                            onPlayPausePress: {
+                                PlaybackManager.shared.togglePlayPause()
+                            },
+                            onForwardPress: {
+                                PlaybackManager.shared.skipForward()
+                            },
+                            onBackwardPress: {
+                                PlaybackManager.shared.skipBackward()
                             }
                         )
                         .frame(width: 280, height: 300)
