@@ -18,6 +18,9 @@ class ClickWheelViewModel: ObservableObject {
     private var lastAngle: Double = 0
     private let feedbackThreshold: Double = 15 // Degrees of rotation to trigger a click
     
+    // Publisher for navigation ticks: -1 for counter-clockwise, +1 for clockwise
+    let tickPublisher = PassthroughSubject<Int, Never>()
+    
     /// Calculates the angle in degrees relative to the center of a given size.
     /// 0 degrees is at 3 o'clock, -90 degrees is at 12 o'clock.
     func angle(for point: CGPoint, in size: CGSize) -> Double {
@@ -30,10 +33,21 @@ class ClickWheelViewModel: ObservableObject {
         
         // Handle feedback generation
         // Calculate delta from last processed angle to check threshold
-        let delta = abs(degrees - lastAngle)
-        if delta > feedbackThreshold {
+        let delta = degrees - lastAngle
+        
+        // Handle wrap-around (e.g. 179 -> -179)
+        var adjustedDelta = delta
+        if delta > 180 { adjustedDelta -= 360 }
+        if delta < -180 { adjustedDelta += 360 }
+        
+        if abs(adjustedDelta) > feedbackThreshold {
             hapticManager.playClick()
             audioManager.playClick()
+            
+            // Emit tick
+            let direction = adjustedDelta > 0 ? 1 : -1
+            tickPublisher.send(direction)
+            
             lastAngle = degrees
         }
         

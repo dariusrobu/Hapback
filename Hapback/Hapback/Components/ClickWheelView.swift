@@ -11,6 +11,8 @@ struct ClickWheelView: View {
     @StateObject private var viewModel = ClickWheelViewModel()
     @State private var rotation: Double = 0
     
+    var onTick: ((Int) -> Void)?
+    
     // Design constants from HTML
     private let wheelBackground = Color(red: 245/255, green: 245/255, blue: 247/255) // #f5f5f7
     private let iconColor = Color.gray.opacity(0.6) // gray-400 equivalent
@@ -91,6 +93,9 @@ struct ClickWheelView: View {
                         self.rotation = angle
                     }
             )
+            .onReceive(viewModel.tickPublisher) { direction in
+                onTick?(direction)
+            }
         }
         .aspectRatio(1, contentMode: .fit)
     }

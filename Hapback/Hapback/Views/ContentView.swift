@@ -15,6 +15,9 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @State private var selectedIndex = 0
+    let menuItems = ["Bohemian Rhapsody", "Come Together", "Stairway to Heaven", "Starman", "Time"]
+    
     var body: some View {
         GeometryReader { outerGeometry in
             ZStack {
@@ -53,13 +56,19 @@ struct ContentView: View {
                             )
                             
                             // List Content
-                            ScrollView(showsIndicators: false) {
-                                VStack(spacing: 0) {
-                                    ListItem(text: "Bohemian Rhapsody")
-                                    ListItem(text: "Come Together")
-                                    ListItem(text: "Stairway to Heaven", isSelected: true)
-                                    ListItem(text: "Starman")
-                                    ListItem(text: "Time")
+                            ScrollViewReader { proxy in
+                                ScrollView(showsIndicators: false) {
+                                    VStack(spacing: 0) {
+                                        ForEach(0..<menuItems.count, id: \.self) { index in
+                                            ListItem(text: menuItems[index], isSelected: index == selectedIndex)
+                                                .id(index)
+                                        }
+                                    }
+                                }
+                                .onChange(of: selectedIndex) { newIndex in
+                                    withAnimation {
+                                        proxy.scrollTo(newIndex, anchor: .center)
+                                    }
                                 }
                             }
                         }
@@ -80,12 +89,21 @@ struct ContentView: View {
                     
                     // Wheel Area (Bottom 50%)
                     ZStack {
-                        ClickWheelView()
-                            .frame(width: 300, height: 300)
+                        ClickWheelView { direction in
+                            handleRotation(direction)
+                        }
+                        .frame(width: 300, height: 300)
                     }
                     .frame(height: outerGeometry.size.height * 0.5)
                 }
             }
+        }
+    }
+    
+    private func handleRotation(_ direction: Int) {
+        let newIndex = selectedIndex + direction
+        if newIndex >= 0 && newIndex < menuItems.count {
+            selectedIndex = newIndex
         }
     }
 }
