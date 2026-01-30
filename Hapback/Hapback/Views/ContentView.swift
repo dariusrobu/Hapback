@@ -14,6 +14,7 @@ struct ContentView: View {
     // Data sources
     @State private var playlists: [Playlist] = []
     @State private var artists: [Artist] = []
+    @State private var albums: [Album] = []
     private let musicService = MusicLibraryService()
     
     var currentDestination: MenuDestination {
@@ -169,8 +170,11 @@ struct ContentView: View {
                     updateCount()
                 }
         case .albums: 
-            PlaceholderView(title: "Albums")
-                .onAppear { updateCount() }
+            AlbumsView(selectedIndex: $selectedIndex, albums: albums)
+                .task {
+                    self.albums = await musicService.fetchAlbums()
+                    updateCount()
+                }
         case .songs: 
             PlaceholderView(title: "Songs")
                 .onAppear { updateCount() }
@@ -226,6 +230,8 @@ struct ContentView: View {
                 currentItemsCount = playlists.count
             case .artists:
                 currentItemsCount = artists.count
+            case .albums:
+                currentItemsCount = albums.count
             default:
                 currentItemsCount = 0
             }

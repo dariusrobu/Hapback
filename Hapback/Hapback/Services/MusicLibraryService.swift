@@ -19,20 +19,27 @@ class MusicLibraryService {
         return query.items ?? []
     }
     
-    func fetchAlbums() -> [MPMediaItemCollection] {
-        let query = MPMediaQuery.albums()
-        return query.collections ?? []
+    func fetchAlbums() async -> [Album] {
+        return await Task.detached(priority: .userInitiated) {
+            let query = MPMediaQuery.albums()
+            let collections = query.collections ?? []
+            return collections.map { Album(from: $0) }
+        }.value
     }
 
-    func fetchPlaylists() -> [Playlist] {
-        let query = MPMediaQuery.playlists()
-        let collections = query.collections ?? []
-        return collections.compactMap { $0 as? MPMediaPlaylist }.map { Playlist(from: $0) }
+    func fetchPlaylists() async -> [Playlist] {
+        return await Task.detached(priority: .userInitiated) {
+            let query = MPMediaQuery.playlists()
+            let collections = query.collections ?? []
+            return collections.compactMap { $0 as? MPMediaPlaylist }.map { Playlist(from: $0) }
+        }.value
     }
 
-    func fetchArtists() -> [Artist] {
-        let query = MPMediaQuery.artists()
-        let collections = query.collections ?? []
-        return collections.map { Artist(from: $0) }
+    func fetchArtists() async -> [Artist] {
+        return await Task.detached(priority: .userInitiated) {
+            let query = MPMediaQuery.artists()
+            let collections = query.collections ?? []
+            return collections.map { Artist(from: $0) }
+        }.value
     }
 }
