@@ -1,0 +1,8 @@
+{
+  "track_id": "core_ui_foundation_20260130",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-30T12:00:00Z",
+  "updated_at": "2026-01-30T12:00:00Z",
+  "description": "Build the core iPod Classic (6th Gen) UI foundation, featuring the virtual click wheel with basic haptics and integration with the system music library."
+}
