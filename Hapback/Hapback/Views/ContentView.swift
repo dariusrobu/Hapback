@@ -20,6 +20,12 @@ struct ContentView: View {
                 Text("iPod Classic (6th Gen) Experience")
                     .font(.headline)
                     .foregroundColor(.gray)
+                
+                Spacer()
+                
+                ClickWheelView()
+                    .frame(width: 300, height: 300)
+                    .padding(.bottom, 50)
             }
         }
     }
