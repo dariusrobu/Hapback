@@ -14,55 +14,52 @@ struct PlaylistsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // LCD Screen Content
-            VStack(spacing: 0) {
-                // Header Bar
-                HStack {
-                    Spacer()
-                    Text("PLAYLISTS")
-                        .font(.system(size: 14, weight: .bold))
-                        .kerning(1.0)
-                    Spacer()
-                    Image(systemName: "battery.100")
-                        .font(.system(size: 12))
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.white.opacity(0.3))
-                .overlay(
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundColor(Color.black.opacity(0.1)),
-                    alignment: .bottom
-                )
-                
-                // List Content
-                ScrollViewReader { proxy in
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 0) {
-                            if playlists.isEmpty {
-                                Text("No Playlists Found")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(.black.opacity(0.5))
-                                    .padding(.top, 40)
-                            } else {
-                                ForEach(0..<playlists.count, id: \.self) { index in
-                                    PlaylistListItem(playlist: playlists[index], isSelected: index == selectedIndex)
-                                        .id(index)
-                                }
+            // Header Bar
+            HStack {
+                Spacer()
+                Text("Playlists")
+                    .font(.system(size: 20, weight: .bold)) // font-chicago approx
+                    .textCase(.uppercase)
+                    .kerning(1.0)
+                Spacer()
+                Image(systemName: "battery.100")
+                    .font(.system(size: 20, weight: .bold))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.clear)
+            .overlay(
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(Color.black.opacity(0.1)),
+                alignment: .bottom
+            )
+            
+            // List Content
+            ScrollViewReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        if playlists.isEmpty {
+                            Text("No Playlists Found")
+                                .font(.system(size: 19, weight: .bold))
+                                .foregroundColor(.black.opacity(0.5))
+                                .padding(.top, 40)
+                        } else {
+                            ForEach(0..<playlists.count, id: \.self) { index in
+                                PlaylistListItem(playlist: playlists[index], isSelected: index == selectedIndex)
+                                    .id(index)
                             }
                         }
                     }
-                    .onChange(of: selectedIndex) { newIndex in
-                        withAnimation(.linear(duration: 0.1)) {
-                            proxy.scrollTo(newIndex, anchor: .center)
-                        }
+                }
+                .onChange(of: selectedIndex) { newIndex in
+                    withAnimation(.linear(duration: 0.1)) {
+                        proxy.scrollTo(newIndex, anchor: .center)
                     }
                 }
             }
-            .background(Color(red: 216/255, green: 233/255, blue: 240/255)) // #d8e9f0
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             fetchPlaylists()
         }
@@ -80,16 +77,17 @@ struct PlaylistListItem: View {
     var body: some View {
         HStack {
             Text(playlist.title)
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 19, weight: .bold)) // font-chicago
                 .kerning(-0.5)
                 .foregroundColor(isSelected ? .white : .black)
+                .lineLimit(1)
             Spacer()
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(isSelected ? .white : .black.opacity(0.6))
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(isSelected ? .white : .black)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
         .background(isSelected ? Color(red: 0, green: 0, blue: 132/255) : Color.clear) // #000084
         .overlay(
             Rectangle()
@@ -98,8 +96,4 @@ struct PlaylistListItem: View {
             alignment: .bottom
         )
     }
-}
-
-#Preview {
-    PlaylistsView()
 }

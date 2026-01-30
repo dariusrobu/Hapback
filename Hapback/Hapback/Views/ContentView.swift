@@ -49,34 +49,36 @@ struct ContentView: View {
                                 destinationView(for: currentDestination)
                             }
                         }
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color(red: 240/255, green: 248/255, blue: 1.0), Color(red: 230/255, green: 240/255, blue: 1.0)]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .cornerRadius(6)
+                        .background(lcdBackgroundColor)
+                        .cornerRadius(4)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.black.opacity(0.2), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(lcdBorderColor, lineWidth: 3)
                         )
                         .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.black.opacity(0.1), lineWidth: 4)
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.black.opacity(0.15), lineWidth: 4)
                                 .blur(radius: 4)
                                 .offset(x: 0, y: 2)
-                                .mask(RoundedRectangle(cornerRadius: 6))
+                                .mask(RoundedRectangle(cornerRadius: 4))
                         )
                         .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-                        .padding(.top, 50)
-                        .padding(.horizontal, 20)
+                        .padding(.top, 40)
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 20)
                     }
                     .frame(height: outerGeometry.size.height * 0.5)
+                    .background(Color(red: 248/255, green: 248/255, blue: 248/255)) // ipod-white
                     
                     // Wheel Area (Bottom 50%)
                     ZStack {
+                        // Polycarbonate Gradient for the bottom half
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.white, Color(white: 0.94), Color(white: 0.90)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        
                         ClickWheelView(
                             onTick: { direction in
                                 handleRotation(direction)
@@ -99,31 +101,38 @@ struct ContentView: View {
         }
     }
     
+    private var lcdBackgroundColor: Color {
+        if navigationStack.isEmpty {
+            return Color(red: 240/255, green: 248/255, blue: 1.0)
+        } else {
+            return Color(red: 216/255, green: 233/255, blue: 240/255) // #d8e9f0
+        }
+    }
+    
+    private var lcdBorderColor: Color {
+        return Color(red: 132/255, green: 132/255, blue: 132/255) // #848484
+    }
+    
     private var homeMenuView: some View {
         VStack(spacing: 0) {
             // Header Bar
             HStack {
-                Image(systemName: "play.fill")
-                    .font(.system(size: 10))
-                    .frame(width: 20, alignment: .leading)
-                
                 Spacer()
                 Text("Hapback")
-                    .font(.system(size: 14, weight: .bold))
-                    .kerning(-0.5)
+                    .font(.system(size: 20, weight: .bold))
+                    .textCase(.uppercase)
+                    .kerning(1.0)
                 Spacer()
-                
-                Image(systemName: "battery.75")
-                    .font(.system(size: 12))
-                    .frame(width: 20, alignment: .trailing)
+                Image(systemName: "battery.100")
+                    .font(.system(size: 20, weight: .bold))
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color.white.opacity(0.5))
+            .padding(.vertical, 8)
+            .background(Color.clear)
             .overlay(
                 Rectangle()
                     .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.15)),
+                    .foregroundColor(Color.black.opacity(0.1)),
                 alignment: .bottom
             )
             
@@ -157,13 +166,27 @@ struct ContentView: View {
                     self.playlists = musicService.fetchPlaylists()
                     updateCount()
                 }
-        case .artists: ArtistsView()
-        case .albums: AlbumsView()
-        case .songs: SongsView()
-        case .extras: ExtrasView()
-        case .settings: SettingsView()
-        case .nowPlaying: NowPlayingView()
-        default: PlaceholderView(title: "Unknown")
+        case .artists: 
+            PlaceholderView(title: "Artists")
+                .onAppear { updateCount() }
+        case .albums: 
+            PlaceholderView(title: "Albums")
+                .onAppear { updateCount() }
+        case .songs: 
+            PlaceholderView(title: "Songs")
+                .onAppear { updateCount() }
+        case .extras: 
+            PlaceholderView(title: "Extras")
+                .onAppear { updateCount() }
+        case .settings: 
+            PlaceholderView(title: "Settings")
+                .onAppear { updateCount() }
+        case .nowPlaying: 
+            NowPlayingView()
+                .onAppear { updateCount() }
+        default: 
+            PlaceholderView(title: "Unknown")
+                .onAppear { updateCount() }
         }
     }
     
@@ -212,17 +235,18 @@ struct ListItem: View {
     var body: some View {
         HStack {
             Text(item.title)
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 19, weight: .bold)) // font-chicago
                 .kerning(-0.5)
                 .foregroundColor(isSelected ? .white : .black)
+                .lineLimit(1)
             Spacer()
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(isSelected ? .white : .black.opacity(0.6))
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(isSelected ? .white : .black)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(isSelected ? Color(red: 0, green: 0, blue: 128/255) : Color.clear)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(isSelected ? Color(red: 0, green: 0, blue: 132/255) : Color.clear) // #000084
         .overlay(
             Rectangle()
                 .frame(height: 1)
