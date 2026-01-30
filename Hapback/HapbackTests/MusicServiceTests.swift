@@ -32,4 +32,11 @@ final class MusicServiceTests: XCTestCase {
         // We expect this to return an array (empty or not)
         XCTAssertNotNil(playlists)
     }
+
+    func testFetchArtists() {
+        let service = MusicLibraryService()
+        let artists: [Artist] = service.fetchArtists()
+        // We expect this to return an array
+        XCTAssertNotNil(artists)
+    }
 }

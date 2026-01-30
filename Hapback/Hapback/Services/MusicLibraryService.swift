@@ -29,4 +29,10 @@ class MusicLibraryService {
         let collections = query.collections ?? []
         return collections.compactMap { $0 as? MPMediaPlaylist }.map { Playlist(from: $0) }
     }
+
+    func fetchArtists() -> [Artist] {
+        let query = MPMediaQuery.artists()
+        let collections = query.collections ?? []
+        return collections.map { Artist(from: $0) }
+    }
 }
