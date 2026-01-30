@@ -16,14 +16,14 @@
     - [x] Integrate feedback with wheel rotation increments.
 - [x] Task: Conductor - User Manual Verification 'Click Wheel Interaction' (Protocol in workflow.md)
 
-## Phase 3: Music Library & Navigation
+## Phase 3: Music Library & Navigation [checkpoint: e971c4b]
 - [x] Task: Music Library Service b03adb5
     - [x] Request permissions for Media Library access.
     - [x] Create a service to fetch Songs and Albums.
 - [x] Task: Core Navigation Menu ceb7528
     - [x] Implement the classic vertical menu (Songs, Artists, Albums).
     - [x] Bind menu selection to wheel rotation data.
-- [ ] Task: Conductor - User Manual Verification 'Music Library & Navigation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Music Library & Navigation' (Protocol in workflow.md)
 
 ## Phase 4: Visual Polishing
 - [ ] Task: Skeuomorphic Styling
