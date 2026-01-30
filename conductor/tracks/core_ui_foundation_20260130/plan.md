@@ -1,7 +1,7 @@
 # Implementation Plan: Core iPod UI Foundation
 
 ## Phase 1: Environment & Scaffolding
-- [~] Task: Project cleanup and initial structure adjustment
+- [x] Task: Project cleanup and initial structure adjustment 241f70f
     - [x] Remove boilerplate SwiftData items not needed for the music player core.
     - [x] Set up the directory structure for Components, Views, and Services.
 - [ ] Task: Conductor - User Manual Verification 'Environment & Scaffolding' (Protocol in workflow.md)
