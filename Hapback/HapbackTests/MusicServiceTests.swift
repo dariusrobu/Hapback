@@ -25,4 +25,11 @@ final class MusicServiceTests: XCTestCase {
         // We just want to ensure it returns a valid status type.
         XCTAssertTrue(status == .authorized || status == .denied || status == .notDetermined || status == .restricted)
     }
+
+    func testFetchPlaylists() {
+        let service = MusicLibraryService()
+        let playlists: [Playlist] = service.fetchPlaylists()
+        // We expect this to return an array (empty or not)
+        XCTAssertNotNil(playlists)
+    }
 }
