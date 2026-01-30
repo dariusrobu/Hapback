@@ -17,7 +17,7 @@
 - [~] Task: Conductor - User Manual Verification 'Playlists View UI' (Protocol in workflow.md)
 
 ## Phase 3: Visual Refinement
-- [ ] Task: Refine LCD LCD Border and Typography
-    - [ ] Match the 3px solid border and inner shadow for the Playlists LCD area.
-    - [ ] Ensure the font matches the Chicago aesthetic defined in the spec.
-- [ ] Task: Conductor - User Manual Verification 'Visual Refinement' (Protocol in workflow.md)
+- [x] Task: Refine LCD LCD Border and Typography 7cf72c6
+    - [x] Match the 3px solid border and inner shadow for the Playlists LCD area.
+    - [x] Ensure the font matches the Chicago aesthetic defined in the spec.
+- [~] Task: Conductor - User Manual Verification 'Visual Refinement' (Protocol in workflow.md)
