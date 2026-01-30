@@ -142,7 +142,7 @@ struct ContentView: View {
                         }
                     }
                 }
-                .onChange(of: selectedIndex) { newIndex in
+                .onChange(of: selectedIndex) { oldIndex, newIndex in
                     if navigationStack.isEmpty {
                         withAnimation(.linear(duration: 0.1)) {
                             proxy.scrollTo(newIndex, anchor: .center)
@@ -157,15 +157,15 @@ struct ContentView: View {
     private func destinationView(for destination: MenuDestination) -> some View {
         switch destination {
         case .playlists: 
-            PlaylistsView(selectedIndex: $selectedIndex)
-                .onAppear {
-                    self.playlists = musicService.fetchPlaylists()
+            PlaylistsView(selectedIndex: $selectedIndex, playlists: playlists)
+                .task {
+                    self.playlists = await musicService.fetchPlaylists()
                     updateCount()
                 }
         case .artists: 
-            ArtistsView(selectedIndex: $selectedIndex)
-                .onAppear {
-                    self.artists = musicService.fetchArtists()
+            ArtistsView(selectedIndex: $selectedIndex, artists: artists)
+                .task {
+                    self.artists = await musicService.fetchArtists()
                     updateCount()
                 }
         case .albums: 
@@ -199,17 +199,21 @@ struct ContentView: View {
     private func handleCenterPress() {
         if navigationStack.isEmpty {
             let destination = homeMenuItems[selectedIndex].destination
-            navigationStack.append(destination)
-            selectedIndex = 0
-            updateCount()
+            withAnimation {
+                navigationStack.append(destination)
+                selectedIndex = 0
+                updateCount()
+            }
         }
     }
     
     private func handleMenuPress() {
         if !navigationStack.isEmpty {
-            navigationStack.removeLast()
-            selectedIndex = 0 
-            updateCount()
+            withAnimation {
+                navigationStack.removeLast()
+                selectedIndex = 0 
+                updateCount()
+            }
         }
     }
     
@@ -247,7 +251,7 @@ struct ListItem: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(isSelected ? Color(red: 0, green: 0, blue: 128/255) : Color.clear)
+        .background(isSelected ? Color(red: 0, green: 0, blue: 128/255) : Color.clear) // #000084
         .overlay(
             Rectangle()
                 .frame(height: 1)

@@ -9,8 +9,7 @@ import SwiftUI
 
 struct ArtistsView: View {
     @Binding var selectedIndex: Int
-    @State private var artists: [Artist] = []
-    private let musicService = MusicLibraryService()
+    let artists: [Artist]
     
     var body: some View {
         VStack(spacing: 0) {
@@ -52,7 +51,7 @@ struct ArtistsView: View {
                         }
                     }
                 }
-                .onChange(of: selectedIndex) { newIndex in
+                .onChange(of: selectedIndex) { oldIndex, newIndex in
                     withAnimation(.linear(duration: 0.1)) {
                         proxy.scrollTo(newIndex, anchor: .center)
                     }
@@ -60,13 +59,6 @@ struct ArtistsView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
-            fetchArtists()
-        }
-    }
-    
-    private func fetchArtists() {
-        self.artists = musicService.fetchArtists()
     }
 }
 
@@ -99,6 +91,6 @@ struct ArtistListItem: View {
 }
 
 #Preview {
-    ArtistsView(selectedIndex: .constant(0))
+    ArtistsView(selectedIndex: .constant(0), artists: [])
         .background(Color(red: 216/255, green: 233/255, blue: 240/255))
 }
