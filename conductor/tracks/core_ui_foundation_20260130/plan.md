@@ -17,9 +17,9 @@
 - [x] Task: Conductor - User Manual Verification 'Click Wheel Interaction' (Protocol in workflow.md)
 
 ## Phase 3: Music Library & Navigation
-- [ ] Task: Music Library Service
-    - [ ] Request permissions for Media Library access.
-    - [ ] Create a service to fetch Songs and Albums.
+- [x] Task: Music Library Service b03adb5
+    - [x] Request permissions for Media Library access.
+    - [x] Create a service to fetch Songs and Albums.
 - [ ] Task: Core Navigation Menu
     - [ ] Implement the classic vertical menu (Songs, Artists, Albums).
     - [ ] Bind menu selection to wheel rotation data.
