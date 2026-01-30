@@ -10,7 +10,10 @@ struct ContentView: View {
     @State private var selectedIndex = 0
     @State private var navigationStack: [MenuDestination] = []
     @State private var currentItemsCount = 0
+    
+    // Data sources
     @State private var playlists: [Playlist] = []
+    @State private var artists: [Artist] = []
     private let musicService = MusicLibraryService()
     
     var currentDestination: MenuDestination {
@@ -19,6 +22,7 @@ struct ContentView: View {
     
     var homeMenuItems: [MenuItem] {
         let allItems = MenuData.mainMenuItems
+        // Mock condition for Now Playing visibility
         let isPlaying = true 
         if isPlaying {
             return allItems
@@ -30,14 +34,6 @@ struct ContentView: View {
     var body: some View {
         GeometryReader { outerGeometry in
             ZStack {
-                // Glossy Polycarbonate Background
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.white, Color(white: 0.96), Color(white: 0.92)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
                 VStack(spacing: 0) {
                     // Display Area (Top 50%)
                     VStack {
@@ -167,8 +163,11 @@ struct ContentView: View {
                     updateCount()
                 }
         case .artists: 
-            PlaceholderView(title: "Artists")
-                .onAppear { updateCount() }
+            ArtistsView(selectedIndex: $selectedIndex)
+                .onAppear {
+                    self.artists = musicService.fetchArtists()
+                    updateCount()
+                }
         case .albums: 
             PlaceholderView(title: "Albums")
                 .onAppear { updateCount() }
@@ -209,7 +208,7 @@ struct ContentView: View {
     private func handleMenuPress() {
         if !navigationStack.isEmpty {
             navigationStack.removeLast()
-            selectedIndex = 0 // Should ideally restore previous index
+            selectedIndex = 0 
             updateCount()
         }
     }
@@ -221,6 +220,8 @@ struct ContentView: View {
             switch currentDestination {
             case .playlists:
                 currentItemsCount = playlists.count
+            case .artists:
+                currentItemsCount = artists.count
             default:
                 currentItemsCount = 0
             }
@@ -235,7 +236,7 @@ struct ListItem: View {
     var body: some View {
         HStack {
             Text(item.title)
-                .font(.system(size: 19, weight: .bold)) // font-chicago
+                .font(.system(size: 19, weight: .bold))
                 .kerning(-0.5)
                 .foregroundColor(isSelected ? .white : .black)
                 .lineLimit(1)
@@ -246,7 +247,7 @@ struct ListItem: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(isSelected ? Color(red: 0, green: 0, blue: 132/255) : Color.clear) // #000084
+        .background(isSelected ? Color(red: 0, green: 0, blue: 128/255) : Color.clear)
         .overlay(
             Rectangle()
                 .frame(height: 1)
