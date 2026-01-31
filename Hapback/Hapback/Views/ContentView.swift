@@ -21,6 +21,9 @@ struct ContentView: View {
     @State private var artistAlbums: [Album] = []
     @State private var albumSongs: [Song] = []
     
+    @StateObject private var stopwatchViewModel = StopwatchViewModel()
+    @StateObject private var brickGameViewModel = BrickGameViewModel()
+    
     private let musicService = MusicLibraryService()
     
     var currentDestination: MenuDestination {
@@ -212,7 +215,22 @@ struct ContentView: View {
                     updateCount()
                 }
         case .extras: 
-            PlaceholderView(title: "Extras")
+            ExtrasMenuView(selectedIndex: $selectedIndex)
+                .onAppear { updateCount() }
+        case .games:
+            GamesMenuView(selectedIndex: $selectedIndex)
+                .onAppear { updateCount() }
+        case .brick:
+            BrickGameView(viewModel: brickGameViewModel)
+                .onAppear { updateCount() }
+        case .clock:
+            ClockView()
+                .onAppear { updateCount() }
+        case .stopwatch:
+            StopwatchView(viewModel: stopwatchViewModel)
+                .onAppear { updateCount() }
+        case .calendars:
+            CalendarView()
                 .onAppear { updateCount() }
         case .settings: 
             SettingsView()
@@ -221,21 +239,27 @@ struct ContentView: View {
             NowPlayingView()
                 .onAppear { updateCount() }
         default: 
-            PlaceholderView(title: "Unknown")
+            PlaceholderView(title: "Coming Soon")
                 .onAppear { updateCount() }
         }
     }
     
     private func handleRotation(_ direction: Int) {
-        if navigationStack.isEmpty || currentDestination != .nowPlaying {
+        if currentDestination == .brick {
+            brickGameViewModel.movePaddle(delta: CGFloat(direction) * 0.05)
+            return
+        }
+        
+        if currentDestination == .nowPlaying {
+            // Adjust volume: each tick is ~2% volume change
+            let delta = Double(direction) * 0.02
+            PlaybackManager.shared.adjustVolume(by: delta)
+        } else {
+            // Standard list scrolling
             let newIndex = selectedIndex + direction
             if newIndex >= 0 && newIndex < currentItemsCount {
                 selectedIndex = newIndex
             }
-        } else if currentDestination == .nowPlaying {
-            // Adjust volume: each tick is ~2% volume change
-            let delta = Double(direction) * 0.02
-            PlaybackManager.shared.adjustVolume(by: delta)
         }
     }
     
@@ -249,6 +273,26 @@ struct ContentView: View {
             }
         } else {
             switch currentDestination {
+            case .extras:
+                let items = MenuData.extrasMenuItems
+                if !items.isEmpty {
+                    let destination = items[selectedIndex].destination
+                    withAnimation {
+                        navigationStack.append(destination)
+                        selectedIndex = 0
+                        updateCount()
+                    }
+                }
+            case .games:
+                let items = MenuData.gamesMenuItems
+                if !items.isEmpty {
+                    let destination = items[selectedIndex].destination
+                    withAnimation {
+                        navigationStack.append(destination)
+                        selectedIndex = 0
+                        updateCount()
+                    }
+                }
             case .artists:
                 if !artists.isEmpty {
                     let artist = artists[selectedIndex]
@@ -298,6 +342,10 @@ struct ContentView: View {
                 }
             case .nowPlaying:
                 PlaybackManager.shared.togglePlayPause()
+            case .stopwatch:
+                stopwatchViewModel.toggle()
+            case .brick:
+                brickGameViewModel.togglePause()
             default:
                 break
             }
@@ -305,6 +353,13 @@ struct ContentView: View {
     }
     
     private func handleMenuPress() {
+        if currentDestination == .stopwatch {
+            if !stopwatchViewModel.isRunning && stopwatchViewModel.time > 0 {
+                stopwatchViewModel.reset()
+                return
+            }
+        }
+        
         if !navigationStack.isEmpty {
             withAnimation {
                 navigationStack.removeLast()
@@ -331,6 +386,10 @@ struct ContentView: View {
                 currentItemsCount = artistAlbums.count
             case .albumDetail:
                 currentItemsCount = albumSongs.count
+            case .extras:
+                currentItemsCount = MenuData.extrasMenuItems.count
+            case .games:
+                currentItemsCount = MenuData.gamesMenuItems.count
             default:
                 currentItemsCount = 0
             }

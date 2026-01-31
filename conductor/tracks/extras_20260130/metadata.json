@@ -1,0 +1,8 @@
+{
+  "track_id": "extras_20260130",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-30T20:00:00Z",
+  "updated_at": "2026-01-30T20:00:00Z",
+  "description": "Implement the Extras sub-menu with Clock, Games (Brick), Stopwatch, and Calendars."
+}

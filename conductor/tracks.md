@@ -11,3 +11,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Finish the app by implementing deep navigation hierarchy (Artist -> Album -> Song) and populating Settings with real storage data.**
   *Link: [./tracks/final_navigation_20260130/](./tracks/final_navigation_20260130/)*
+
+---
+
+- [x] **Track: Implement the Extras sub-menu with Clock, Games (Brick), Stopwatch, and Calendars.**
+  *Link: [./tracks/extras_20260130/](./tracks/extras_20260130/)*

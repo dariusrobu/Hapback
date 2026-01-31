@@ -17,11 +17,16 @@ enum MenuDestination: Equatable {
     case nowPlaying
     case artistDetail(Artist)
     case albumDetail(Album)
+    case clock
+    case games
+    case stopwatch
+    case calendars
+    case brick
     case unknown
     
     static func == (lhs: MenuDestination, rhs: MenuDestination) -> Bool {
         switch (lhs, rhs) {
-        case (.playlists, .playlists), (.artists, .artists), (.albums, .albums), (.songs, .songs), (.extras, .extras), (.settings, .settings), (.nowPlaying, .nowPlaying), (.unknown, .unknown):
+        case (.playlists, .playlists), (.artists, .artists), (.albums, .albums), (.songs, .songs), (.extras, .extras), (.settings, .settings), (.nowPlaying, .nowPlaying), (.clock, .clock), (.games, .games), (.stopwatch, .stopwatch), (.calendars, .calendars), (.brick, .brick), (.unknown, .unknown):
             return true
         case (.artistDetail(let a), .artistDetail(let b)):
             return a.id == b.id
@@ -49,5 +54,16 @@ struct MenuData {
         MenuItem(title: "Extras", icon: "star", destination: .extras),
         MenuItem(title: "Settings", icon: "gear", destination: .settings),
         MenuItem(title: "Now Playing", icon: "play.circle", destination: .nowPlaying)
+    ]
+    
+    static let extrasMenuItems: [MenuItem] = [
+        MenuItem(title: "Clock", icon: "clock", destination: .clock),
+        MenuItem(title: "Games", icon: "gamecontroller", destination: .games),
+        MenuItem(title: "Stopwatch", icon: "stopwatch", destination: .stopwatch),
+        MenuItem(title: "Calendars", icon: "calendar", destination: .calendars)
+    ]
+    
+    static let gamesMenuItems: [MenuItem] = [
+        MenuItem(title: "Brick", icon: "square.grid.3x3.fill", destination: .brick)
     ]
 }
