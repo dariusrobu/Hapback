@@ -16,4 +16,10 @@ final class PlaybackTests: XCTestCase {
         XCTAssertNotNil(manager)
         XCTAssertFalse(manager.isPlaying)
     }
+    
+    func testPauseState() {
+        let manager = PlaybackManager.shared
+        manager.pause()
+        XCTAssertFalse(manager.isPlaying)
+    }
 }
