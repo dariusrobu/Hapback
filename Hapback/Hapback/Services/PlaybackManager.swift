@@ -22,10 +22,27 @@ class PlaybackManager: ObservableObject {
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
     
+    private var queue: [Song] = []
+    private var currentIndex: Int = 0
+    private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    
     private init() {
         setupAudioSession()
         setupInterruptionObserver()
+        setupBackgroundObserver()
         setupRemoteCommandCenter()
+    }
+    
+    private func setupBackgroundObserver() {
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            print("DEBUG: Re-asserting audio session activity for background")
+            try? AVAudioSession.sharedInstance().setActive(true)
+            self?.updateNowPlayingInfo()
+        }
     }
     
     private func setupRemoteCommandCenter() {
@@ -58,8 +75,12 @@ class PlaybackManager: ObservableObject {
     
     private func setupAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowBluetooth, .allowAirPlay])
+            // Disable mixWithOthers by not including it in options. Using .longFormAudio policy.
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio, options: [.allowBluetooth, .allowAirPlay])
             try AVAudioSession.sharedInstance().setActive(true)
+            
+            // Tell the application to start receiving remote control events
+            UIApplication.shared.beginReceivingRemoteControlEvents()
         } catch {
             print("Failed to set up audio session: \(error)")
         }
@@ -92,43 +113,106 @@ class PlaybackManager: ObservableObject {
         }
     }
     
-    func play(_ song: Song) {
+    func play(_ song: Song, in queue: [Song] = []) {
+        if !queue.isEmpty {
+            self.queue = queue
+            self.currentIndex = queue.firstIndex(where: { $0.id == song.id }) ?? 0
+        } else {
+            self.queue = [song]
+            self.currentIndex = 0
+        }
+        
+        playCurrentIndex()
+    }
+    
+    private func playCurrentIndex() {
+        guard currentIndex >= 0 && currentIndex < queue.count else { return }
+        let song = queue[currentIndex]
+        
+        print("DEBUG: Starting playback for \(song.title) in background-ready mode")
+        
+        // Start a short background task to bridge the gap
+        self.backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "HapbackPlayback") { [weak self] in
+            print("DEBUG: Background task expired")
+            if let task = self?.backgroundTask {
+                UIApplication.shared.endBackgroundTask(task)
+                self?.backgroundTask = .invalid
+            }
+        }
+        
+        // Explicitly set category and active for background support with longFormAudio policy
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default, policy: .longFormAudio, options: [.allowBluetooth, .allowAirPlay])
+            try session.setActive(true)
+        } catch {
+            print("ERROR: Failed to activate background audio session: \(error)")
+        }
+        
         // Stop current if any
         player?.pause()
         removeTimeObserver()
         
+        // Cleanup old observers
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: nil)
+        
         guard let url = song.fileURL else {
-            print("Song has no URL for playback")
+            print("ERROR: Song has no URL for playback")
+            UIApplication.shared.endBackgroundTask(self.backgroundTask)
             return
         }
         
-        let asset = AVAsset(url: url)
+        // Use precise duration key to prevent initialization hangs
+        let asset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationKey: true])
         let playerItem = AVPlayerItem(asset: asset)
         
         if player == nil {
             player = AVQueuePlayer(playerItem: playerItem)
+            player?.allowsExternalPlayback = true
         } else {
             player?.replaceCurrentItem(with: playerItem)
         }
         
         currentSong = song
+        // Reset time
+        currentTime = 0
+        
         // Duration from media item if available, otherwise from asset
         if let mediaItem = song.mediaItem {
             duration = mediaItem.playbackDuration
         } else {
-            // Task to load duration from asset if not available
             Task {
                 if let duration = try? await asset.load(.duration) {
                     self.duration = duration.seconds
+                    self.updateNowPlayingInfo()
                 }
             }
         }
         
+        updateNowPlayingInfo() // Call before play
         player?.play()
+        player?.rate = 1.0 // Force rate to 1.0
         isPlaying = true
         
-        updateNowPlayingInfo()
         addTimeObserver()
+        
+        // End the background task after a short delay once playback is confirmed
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            if let task = self?.backgroundTask, task != .invalid {
+                UIApplication.shared.endBackgroundTask(task)
+                self?.backgroundTask = .invalid
+            }
+        }
+        
+        // Observe end of item to auto-skip
+        NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: playerItem,
+            queue: .main
+        ) { [weak self] _ in
+            print("DEBUG: Track ended, skipping forward")
+            self?.skipForward()
+        }
     }
     
     func pause() {
@@ -150,14 +234,31 @@ class PlaybackManager: ObservableObject {
     }
     
     func skipForward() {
-        // Implement logic to skip to next in queue if implemented
-        updateNowPlayingInfo()
+        if currentIndex < queue.count - 1 {
+            currentIndex += 1
+            playCurrentIndex()
+        } else {
+            // End of queue, just stop or loop
+            pause()
+            player?.seek(to: .zero)
+        }
     }
     
     func skipBackward() {
-        // Implement logic to skip back or restart track
-        player?.seek(to: .zero)
-        updateNowPlayingInfo()
+        if currentTime > 3.0 {
+            // Restart track if more than 3 seconds in
+            player?.seek(to: .zero)
+            currentTime = 0
+            updateNowPlayingInfo()
+        } else if currentIndex > 0 {
+            currentIndex -= 1
+            playCurrentIndex()
+        } else {
+            // Start of queue, just restart track
+            player?.seek(to: .zero)
+            currentTime = 0
+            updateNowPlayingInfo()
+        }
     }
     
     func adjustVolume(by delta: Double) {
@@ -184,7 +285,7 @@ class PlaybackManager: ObservableObject {
             }
         }
         
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player?.currentTime().seconds ?? 0
         nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
         
@@ -198,10 +299,11 @@ class PlaybackManager: ObservableObject {
             // Ensure mutation happens on main actor
             Task { @MainActor in
                 self.currentTime = time.seconds
-                // Periodically update the progress bar info for the lock screen
-                // but not every second to avoid overhead, maybe every 5 seconds or on play/pause
-                // Actually, standard practice is to update on major state changes.
-                // The elapsed time is updated by the system automatically based on the rate.
+                
+                // Update system info center every 10 seconds to keep it fresh
+                if Int(self.currentTime) % 10 == 0 {
+                    self.updateNowPlayingInfo()
+                }
             }
         }
     }

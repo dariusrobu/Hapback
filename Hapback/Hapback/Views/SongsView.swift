@@ -7,15 +7,29 @@
 
 import SwiftUI
 import MediaPlayer
+import UniformTypeIdentifiers
 
 struct SongsView: View {
     @Binding var selectedIndex: Int
     let songs: [Song]
+    var onImport: (() -> Void)?
+    
+    @State private var isImporting = false
+    private let scanner = FileScannerService()
     
     var body: some View {
         VStack(spacing: 0) {
             // Header Bar
             HStack {
+                Button(action: {
+                    isImporting = true
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.blue)
+                }
+                .frame(width: 40, alignment: .leading)
+                
                 Spacer()
                 Text("Songs")
                     .font(.system(size: 20, weight: .bold))
@@ -24,6 +38,7 @@ struct SongsView: View {
                 Spacer()
                 Image(systemName: "battery.100")
                     .font(.system(size: 20, weight: .bold))
+                    .frame(width: 40, alignment: .trailing)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -40,12 +55,20 @@ struct SongsView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         if songs.isEmpty {
-                            Text("No Songs Found")
-                                .font(.system(size: 19, weight: .bold))
-                                .foregroundColor(.black.opacity(0.5))
-                                .padding(.top, 40)
+                            VStack(spacing: 12) {
+                                Text("No Songs Found")
+                                    .font(.system(size: 19, weight: .bold))
+                                    .foregroundColor(.black.opacity(0.5))
+                                
+                                Text("Tap the + icon to import music\nfrom your Files app.")
+                                    .font(.system(size: 14))
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.black.opacity(0.4))
+                            }
+                            .padding(.top, 40)
                         } else {
-                            ForEach(0..<songs.count, id: \.self) { index in
+                            ForEach(0..<songs.count, id: \.self) {
+                                index in
                                 SongListItem(song: songs[index], isSelected: index == selectedIndex)
                                     .id(index)
                             }
@@ -60,6 +83,23 @@ struct SongsView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .fileImporter(
+            isPresented: $isImporting,
+            allowedContentTypes: [.audio, .mp3, .mpeg4Audio],
+            allowsMultipleSelection: true
+        ) { result in
+            switch result {
+            case .success(let urls):
+                Task {
+                    for url in urls {
+                        await scanner.importFile(from: url)
+                    }
+                    onImport?()
+                }
+            case .failure(let error):
+                print("Import failed: \(error.localizedDescription)")
+            }
+        }
     }
 }
 

@@ -1,8 +1,0 @@
-{
-  "track_id": "playback_engine_20260130",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-30T17:00:00Z",
-  "updated_at": "2026-01-30T17:00:00Z",
-  "description": "Implement the music playback engine using AVFoundation and create the Now Playing view with click wheel controls."
-}

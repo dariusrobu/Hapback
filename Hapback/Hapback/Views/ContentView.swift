@@ -106,6 +106,9 @@ struct ContentView: View {
         .task {
             // Request permissions at startup to avoid crashes later
             _ = await musicService.requestAuthorization()
+            // Force a scan to "wake up" the Documents folder for the Files app
+            let scanner = FileScannerService()
+            _ = await scanner.scanDocumentsDirectory()
             updateCount()
         }
     }
@@ -188,11 +191,16 @@ struct ContentView: View {
                     updateCount()
                 }
         case .songs: 
-            SongsView(selectedIndex: $selectedIndex, songs: songs)
-                .task {
+            SongsView(selectedIndex: $selectedIndex, songs: songs, onImport: {
+                Task {
                     self.songs = await musicService.fetchSongs()
                     updateCount()
                 }
+            })
+            .task {
+                self.songs = await musicService.fetchSongs()
+                updateCount()
+            }
         case .extras: 
             PlaceholderView(title: "Extras")
                 .onAppear { updateCount() }
@@ -231,7 +239,7 @@ struct ContentView: View {
             }
         } else if currentDestination == .songs && !songs.isEmpty {
             let song = songs[selectedIndex]
-            PlaybackManager.shared.play(song)
+            PlaybackManager.shared.play(song, in: songs)
             withAnimation {
                 navigationStack.append(.nowPlaying)
                 selectedIndex = 0
