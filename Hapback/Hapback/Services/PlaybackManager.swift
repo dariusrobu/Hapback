@@ -24,14 +24,42 @@ class PlaybackManager: ObservableObject {
     
     private init() {
         setupAudioSession()
+        setupInterruptionObserver()
     }
     
     private func setupAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowBluetooth, .allowAirPlay])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Failed to set up audio session: \(error)")
+        }
+    }
+    
+    private func setupInterruptionObserver() {
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            queue: .main
+        ) { [weak self] notification in
+            guard let userInfo = notification.userInfo,
+                  let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+                return
+            }
+            
+            if type == .began {
+                // Interruption began, pause playback
+                self?.pause()
+            } else if type == .ended {
+                if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
+                    let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+                    if options.contains(.shouldResume) {
+                        // User preference is manual resume (as per spec), so we don't auto-resume here.
+                        // But we still update the state.
+                    }
+                }
+            }
         }
     }
     
@@ -73,15 +101,20 @@ class PlaybackManager: ObservableObject {
         addTimeObserver()
     }
     
+    func pause() {
+        player?.pause()
+        isPlaying = false
+    }
+    
     func togglePlayPause() {
         guard let player = player else { return }
         
         if isPlaying {
-            player.pause()
+            pause()
         } else {
             player.play()
+            isPlaying = true
         }
-        isPlaying.toggle()
     }
     
     func skipForward() {
