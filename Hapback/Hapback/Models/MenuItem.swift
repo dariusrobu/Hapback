@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MenuDestination {
+enum MenuDestination: Equatable {
     case playlists
     case artists
     case albums
@@ -15,7 +15,22 @@ enum MenuDestination {
     case extras
     case settings
     case nowPlaying
+    case artistDetail(Artist)
+    case albumDetail(Album)
     case unknown
+    
+    static func == (lhs: MenuDestination, rhs: MenuDestination) -> Bool {
+        switch (lhs, rhs) {
+        case (.playlists, .playlists), (.artists, .artists), (.albums, .albums), (.songs, .songs), (.extras, .extras), (.settings, .settings), (.nowPlaying, .nowPlaying), (.unknown, .unknown):
+            return true
+        case (.artistDetail(let a), .artistDetail(let b)):
+            return a.id == b.id
+        case (.albumDetail(let a), .albumDetail(let b)):
+            return a.id == b.id
+        default:
+            return false
+        }
+    }
 }
 
 struct MenuItem: Identifiable {

@@ -1,0 +1,8 @@
+{
+  "track_id": "final_navigation_20260130",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-30T19:30:00Z",
+  "updated_at": "2026-01-30T19:30:00Z",
+  "description": "Finish the app by implementing deep navigation hierarchy (Artist -> Album -> Song) and populating Settings with real storage data."
+}

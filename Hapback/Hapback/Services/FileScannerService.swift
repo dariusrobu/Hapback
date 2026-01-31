@@ -73,6 +73,24 @@ class FileScannerService {
         }
     }
     
+    func calculateTotalStorageUsed() -> Int64 {
+        let fileManager = FileManager.default
+        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return 0
+        }
+        
+        var totalSize: Int64 = 0
+        if let enumerator = fileManager.enumerator(at: documentsURL, includingPropertiesForKeys: [.fileSizeKey], options: []) {
+            for case let fileURL as URL in enumerator {
+                if let resourceValues = try? fileURL.resourceValues(forKeys: [.fileSizeKey]),
+                   let fileSize = resourceValues.fileSize {
+                    totalSize += Int64(fileSize)
+                }
+            }
+        }
+        return totalSize
+    }
+    
     private func extractMetadata(from url: URL) async -> Song? {
         let asset = AVAsset(url: url)
         

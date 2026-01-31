@@ -18,11 +18,11 @@ class MusicLibraryService {
     
     func fetchSongs() async -> [Song] {
         let systemSongsQuery = MPMediaQuery.songs()
-        let systemCollections = systemSongsQuery.items ?? []
+        let systemItems = systemSongsQuery.items ?? []
         var songs: [Song] = []
         
         // Add system songs
-        for item in systemCollections {
+        for item in systemItems {
             songs.append(Song(from: item))
         }
         
@@ -103,5 +103,51 @@ class MusicLibraryService {
         }
         
         return artists
+    }
+    
+    // Filtered Queries
+    
+    func fetchAlbums(for artist: Artist) async -> [Album] {
+        // Fetch system albums for this artist
+        let query = MPMediaQuery.albums()
+        let predicate = MPMediaPropertyPredicate(value: artist.name, forProperty: MPMediaItemPropertyArtist)
+        query.addFilterPredicate(predicate)
+        let collections = query.collections ?? []
+        var albums: [Album] = collections.map { Album(from: $0) }
+        
+        // Aggregate local albums for this artist
+        let localSongs = await fileScanner.scanDocumentsDirectory()
+        let artistLocalSongs = localSongs.filter { $0.artist == artist.name }
+        let localAlbumsGrouped = Dictionary(grouping: artistLocalSongs) { $0.albumTitle }
+        
+        for (albumTitle, songs) in localAlbumsGrouped {
+            if !albums.contains(where: { $0.title == albumTitle }) {
+                let firstSong = songs.first!
+                let localAlbum = Album(
+                    id: "local_album_\(albumTitle)",
+                    title: albumTitle,
+                    artist: firstSong.artist,
+                    artwork: firstSong.artwork,
+                    songs: songs
+                )
+                albums.append(localAlbum)
+            }
+        }
+        
+        return albums
+    }
+    
+    func fetchSongs(for album: Album) async -> [Song] {
+        // If it's a system album, we can use MPMediaQuery
+        if !album.id.hasPrefix("local_album_") {
+            let query = MPMediaQuery.songs()
+            let predicate = MPMediaPropertyPredicate(value: album.title, forProperty: MPMediaItemPropertyAlbumTitle)
+            query.addFilterPredicate(predicate)
+            let items = query.items ?? []
+            return items.map { Song(from: $0) }
+        } else {
+            // It's a local album, we already have the songs
+            return album.songs
+        }
     }
 }

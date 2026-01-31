@@ -13,12 +13,6 @@ struct ExtrasView: View {
     }
 }
 
-struct SettingsView: View {
-    var body: some View {
-        PlaceholderView(title: "Settings")
-    }
-}
-
 struct PlaceholderView: View {
     let title: String
     

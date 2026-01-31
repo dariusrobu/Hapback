@@ -16,6 +16,11 @@ struct ContentView: View {
     @State private var artists: [Artist] = []
     @State private var albums: [Album] = []
     @State private var songs: [Song] = []
+    
+    // Detail data sources
+    @State private var artistAlbums: [Album] = []
+    @State private var albumSongs: [Song] = []
+    
     private let musicService = MusicLibraryService()
     
     var currentDestination: MenuDestination {
@@ -23,14 +28,7 @@ struct ContentView: View {
     }
     
     var homeMenuItems: [MenuItem] {
-        let allItems = MenuData.mainMenuItems
-        // Mock condition for Now Playing visibility
-        let isPlaying = true 
-        if isPlaying {
-            return allItems
-        } else {
-            return allItems.filter { $0.destination != .nowPlaying }
-        }
+        return MenuData.mainMenuItems
     }
     
     var body: some View {
@@ -201,11 +199,23 @@ struct ContentView: View {
                 self.songs = await musicService.fetchSongs()
                 updateCount()
             }
+        case .artistDetail(let artist):
+            ArtistDetailView(selectedIndex: $selectedIndex, artist: artist)
+                .task {
+                    self.artistAlbums = await musicService.fetchAlbums(for: artist)
+                    updateCount()
+                }
+        case .albumDetail(let album):
+            AlbumDetailView(selectedIndex: $selectedIndex, album: album)
+                .task {
+                    self.albumSongs = await musicService.fetchSongs(for: album)
+                    updateCount()
+                }
         case .extras: 
             PlaceholderView(title: "Extras")
                 .onAppear { updateCount() }
         case .settings: 
-            PlaceholderView(title: "Settings")
+            SettingsView()
                 .onAppear { updateCount() }
         case .nowPlaying: 
             NowPlayingView()
@@ -237,16 +247,60 @@ struct ContentView: View {
                 selectedIndex = 0
                 updateCount()
             }
-        } else if currentDestination == .songs && !songs.isEmpty {
-            let song = songs[selectedIndex]
-            PlaybackManager.shared.play(song, in: songs)
-            withAnimation {
-                navigationStack.append(.nowPlaying)
-                selectedIndex = 0
-                updateCount()
+        } else {
+            switch currentDestination {
+            case .artists:
+                if !artists.isEmpty {
+                    let artist = artists[selectedIndex]
+                    withAnimation {
+                        navigationStack.append(.artistDetail(artist))
+                        selectedIndex = 0
+                        updateCount()
+                    }
+                }
+            case .albums:
+                if !albums.isEmpty {
+                    let album = albums[selectedIndex]
+                    withAnimation {
+                        navigationStack.append(.albumDetail(album) )
+                        selectedIndex = 0
+                        updateCount()
+                    }
+                }
+            case .artistDetail:
+                if !artistAlbums.isEmpty {
+                    let album = artistAlbums[selectedIndex]
+                    withAnimation {
+                        navigationStack.append(.albumDetail(album))
+                        selectedIndex = 0
+                        updateCount()
+                    }
+                }
+            case .albumDetail:
+                if !albumSongs.isEmpty {
+                    let song = albumSongs[selectedIndex]
+                    PlaybackManager.shared.play(song, in: albumSongs)
+                    withAnimation {
+                        navigationStack.append(.nowPlaying)
+                        selectedIndex = 0
+                        updateCount()
+                    }
+                }
+            case .songs:
+                if !songs.isEmpty {
+                    let song = songs[selectedIndex]
+                    PlaybackManager.shared.play(song, in: songs)
+                    withAnimation {
+                        navigationStack.append(.nowPlaying)
+                        selectedIndex = 0
+                        updateCount()
+                    }
+                }
+            case .nowPlaying:
+                PlaybackManager.shared.togglePlayPause()
+            default:
+                break
             }
-        } else if currentDestination == .nowPlaying {
-            PlaybackManager.shared.togglePlayPause()
         }
     }
     
@@ -273,6 +327,10 @@ struct ContentView: View {
                 currentItemsCount = albums.count
             case .songs:
                 currentItemsCount = songs.count
+            case .artistDetail:
+                currentItemsCount = artistAlbums.count
+            case .albumDetail:
+                currentItemsCount = albumSongs.count
             default:
                 currentItemsCount = 0
             }

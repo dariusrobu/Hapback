@@ -39,9 +39,11 @@ class PlaybackManager: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            print("DEBUG: Re-asserting audio session activity for background")
-            try? AVAudioSession.sharedInstance().setActive(true)
-            self?.updateNowPlayingInfo()
+            Task { @MainActor in
+                print("DEBUG: Re-asserting audio session activity for background")
+                try? AVAudioSession.sharedInstance().setActive(true)
+                self?.updateNowPlayingInfo()
+            }
         }
     }
     
@@ -50,44 +52,73 @@ class PlaybackManager: ObservableObject {
         
         commandCenter.playCommand.isEnabled = true
         commandCenter.playCommand.addTarget { [weak self] event in
-            self?.togglePlayPause()
-            return .success
+            if let self = self {
+                Task { @MainActor in
+                    self.togglePlayPause()
+                }
+                return .success
+            }
+            return .commandFailed
         }
         
         commandCenter.pauseCommand.isEnabled = true
         commandCenter.pauseCommand.addTarget { [weak self] event in
-            self?.pause()
-            return .success
+            if let self = self {
+                Task { @MainActor in
+                    self.pause()
+                }
+                return .success
+            }
+            return .commandFailed
         }
         
         commandCenter.nextTrackCommand.isEnabled = true
         commandCenter.nextTrackCommand.addTarget { [weak self] event in
-            self?.skipForward()
-            return .success
+            if let self = self {
+                Task { @MainActor in
+                    self.skipForward()
+                }
+                return .success
+            }
+            return .commandFailed
         }
         
         commandCenter.previousTrackCommand.isEnabled = true
         commandCenter.previousTrackCommand.addTarget { [weak self] event in
-            self?.skipBackward()
-            return .success
+            if let self = self {
+                Task { @MainActor in
+                    self.skipBackward()
+                }
+                return .success
+            }
+            return .commandFailed
         }
     }
     
-    private func setupAudioSession() {
-        do {
-            // Disable mixWithOthers by not including it in options. Using .longFormAudio policy.
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio, options: [.allowBluetooth, .allowAirPlay])
-            try AVAudioSession.sharedInstance().setActive(true)
-            
-            // Tell the application to start receiving remote control events
-            UIApplication.shared.beginReceivingRemoteControlEvents()
-        } catch {
-            print("Failed to set up audio session: \(error)")
+        private func setupAudioSession() {
+            // Session is primarily managed by AppDelegate for early activation.
+            do {
+                let session = AVAudioSession.sharedInstance()
+                // Using .playback without specific options to ensure standard behavior
+                try session.setCategory(.playback, mode: .default, options: [.allowBluetoothA2DP, .allowAirPlay])
+                try session.setActive(true)
+                
+                // Listen for route changes (e.g., headphones plugged/unplugged)
+                NotificationCenter.default.addObserver(
+                    forName: AVAudioSession.routeChangeNotification,
+                    object: session,
+                    queue: .main
+                ) { notification in
+                    print("DEBUG: Audio route changed: \(notification.userInfo ?? [:])")
+                }
+                
+                UIApplication.shared.beginReceivingRemoteControlEvents()
+            } catch {
+                print("ERROR: Failed to refine audio session: \(error)")
+            }
         }
-    }
     
-    private func setupInterruptionObserver() {
-        NotificationCenter.default.addObserver(
+        private func setupInterruptionObserver() {        NotificationCenter.default.addObserver(
             forName: AVAudioSession.interruptionNotification,
             object: AVAudioSession.sharedInstance(),
             queue: .main
@@ -129,24 +160,13 @@ class PlaybackManager: ObservableObject {
         guard currentIndex >= 0 && currentIndex < queue.count else { return }
         let song = queue[currentIndex]
         
-        print("DEBUG: Starting playback for \(song.title) in background-ready mode")
+        print("DEBUG: Starting playback for \(song.title)")
         
-        // Start a short background task to bridge the gap
-        self.backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "HapbackPlayback") { [weak self] in
-            print("DEBUG: Background task expired")
-            if let task = self?.backgroundTask {
-                UIApplication.shared.endBackgroundTask(task)
-                self?.backgroundTask = .invalid
-            }
-        }
-        
-        // Explicitly set category and active for background support with longFormAudio policy
+        // Ensure audio session is active
         do {
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .default, policy: .longFormAudio, options: [.allowBluetooth, .allowAirPlay])
-            try session.setActive(true)
+            try AVAudioSession.sharedInstance().setActive(true)
         } catch {
-            print("ERROR: Failed to activate background audio session: \(error)")
+            print("ERROR: Failed to activate audio session: \(error)")
         }
         
         // Stop current if any
@@ -158,12 +178,11 @@ class PlaybackManager: ObservableObject {
         
         guard let url = song.fileURL else {
             print("ERROR: Song has no URL for playback")
-            UIApplication.shared.endBackgroundTask(self.backgroundTask)
             return
         }
         
-        // Use precise duration key to prevent initialization hangs
-        let asset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationKey: true])
+        // Use basic initialization for maximum compatibility
+        let asset = AVAsset(url: url)
         let playerItem = AVPlayerItem(asset: asset)
         
         if player == nil {
@@ -172,6 +191,10 @@ class PlaybackManager: ObservableObject {
         } else {
             player?.replaceCurrentItem(with: playerItem)
         }
+        
+        // Force volume settings and disable mute
+        player?.volume = 1.0
+        player?.isMuted = false
         
         currentSong = song
         // Reset time
@@ -182,27 +205,23 @@ class PlaybackManager: ObservableObject {
             duration = mediaItem.playbackDuration
         } else {
             Task {
-                if let duration = try? await asset.load(.duration) {
-                    self.duration = duration.seconds
-                    self.updateNowPlayingInfo()
-                }
+                // Using explicit property reference to avoid ambiguity
+                let assetDuration = asset.duration
+                let seconds = CMTimeGetSeconds(assetDuration)
+                self.duration = seconds
+                self.updateNowPlayingInfo()
             }
         }
         
         updateNowPlayingInfo() // Call before play
+        
+        // Final session activation check
+        try? AVAudioSession.sharedInstance().setActive(true)
+        
         player?.play()
-        player?.rate = 1.0 // Force rate to 1.0
         isPlaying = true
         
         addTimeObserver()
-        
-        // End the background task after a short delay once playback is confirmed
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-            if let task = self?.backgroundTask, task != .invalid {
-                UIApplication.shared.endBackgroundTask(task)
-                self?.backgroundTask = .invalid
-            }
-        }
         
         // Observe end of item to auto-skip
         NotificationCenter.default.addObserver(

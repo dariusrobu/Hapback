@@ -4,7 +4,7 @@
 Hapback is a native iOS/macOS application built using Swift and SwiftUI.
 
 ## Status
-The foundational iPod Classic (6th Gen) user interface is implemented, including a functional virtual click wheel with haptic and auditory feedback. The Classic Home Page, Playlists, Artists, and Songs views are now fully functional with both system library integration and local file playback support. The app now supports background audio playback and full integration with the iOS Lock Screen and Control Center.
+The Hapback application is now substantially complete. It features a high-fidelity iPod Classic (6th Gen) user interface with a functional virtual click wheel, haptic and auditory feedback, and a deep navigation hierarchy (Artist -> Album -> Song). The app integrates both system library music and local file imports with metadata extraction. Playback is fully functional with background support, lock screen controls, and real-time storage reporting in the Settings menu.
 
 ## Vision and Purpose
 Hapback is a dedicated audio player designed to transport users back to the golden era of portable music. It is built for individuals who miss the specific, tactile feeling of owning and using a classic iPod. The goal is to recreate not just the look, but the soul of the device—the physical connection between the user and their music library.

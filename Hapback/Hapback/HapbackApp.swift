@@ -11,6 +11,7 @@ import AVFoundation
 
 @main
 struct HapbackApp: App {
+    @UIApplicationDelegateAdaptor(HapbackAppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     
     var sharedModelContainer: ModelContainer = {
