@@ -25,6 +25,35 @@ class PlaybackManager: ObservableObject {
     private init() {
         setupAudioSession()
         setupInterruptionObserver()
+        setupRemoteCommandCenter()
+    }
+    
+    private func setupRemoteCommandCenter() {
+        let commandCenter = MPRemoteCommandCenter.shared()
+        
+        commandCenter.playCommand.isEnabled = true
+        commandCenter.playCommand.addTarget { [weak self] event in
+            self?.togglePlayPause()
+            return .success
+        }
+        
+        commandCenter.pauseCommand.isEnabled = true
+        commandCenter.pauseCommand.addTarget { [weak self] event in
+            self?.pause()
+            return .success
+        }
+        
+        commandCenter.nextTrackCommand.isEnabled = true
+        commandCenter.nextTrackCommand.addTarget { [weak self] event in
+            self?.skipForward()
+            return .success
+        }
+        
+        commandCenter.previousTrackCommand.isEnabled = true
+        commandCenter.previousTrackCommand.addTarget { [weak self] event in
+            self?.skipBackward()
+            return .success
+        }
     }
     
     private func setupAudioSession() {
@@ -98,12 +127,14 @@ class PlaybackManager: ObservableObject {
         player?.play()
         isPlaying = true
         
+        updateNowPlayingInfo()
         addTimeObserver()
     }
     
     func pause() {
         player?.pause()
         isPlaying = false
+        updateNowPlayingInfo()
     }
     
     func togglePlayPause() {
@@ -114,16 +145,19 @@ class PlaybackManager: ObservableObject {
         } else {
             player.play()
             isPlaying = true
+            updateNowPlayingInfo()
         }
     }
     
     func skipForward() {
         // Implement logic to skip to next in queue if implemented
+        updateNowPlayingInfo()
     }
     
     func skipBackward() {
         // Implement logic to skip back or restart track
         player?.seek(to: .zero)
+        updateNowPlayingInfo()
     }
     
     func adjustVolume(by delta: Double) {
@@ -133,13 +167,41 @@ class PlaybackManager: ObservableObject {
         player.volume = Float(newVolume)
     }
     
+    private func updateNowPlayingInfo() {
+        guard let song = currentSong else {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+            return
+        }
+        
+        var nowPlayingInfo = [String: Any]()
+        nowPlayingInfo[MPMediaItemPropertyTitle] = song.title
+        nowPlayingInfo[MPMediaItemPropertyArtist] = song.artist
+        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = song.albumTitle
+        
+        if let image = song.artwork {
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
+                return image
+            }
+        }
+        
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+        
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+    
     private func addTimeObserver() {
-        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        let interval = CMTime(seconds: 1.0, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             guard let self = self else { return }
             // Ensure mutation happens on main actor
             Task { @MainActor in
                 self.currentTime = time.seconds
+                // Periodically update the progress bar info for the lock screen
+                // but not every second to avoid overhead, maybe every 5 seconds or on play/pause
+                // Actually, standard practice is to update on major state changes.
+                // The elapsed time is updated by the system automatically based on the rate.
             }
         }
     }
