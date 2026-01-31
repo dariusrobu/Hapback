@@ -89,13 +89,13 @@ struct ContentView: View {
                                 handleMenuPress()
                             },
                             onPlayPausePress: {
-                                PlaybackManager.shared.togglePlayPause()
+                                handlePlayPausePress()
                             },
                             onForwardPress: {
-                                PlaybackManager.shared.skipForward()
+                                handleForwardPress()
                             },
                             onBackwardPress: {
-                                PlaybackManager.shared.skipBackward()
+                                handleBackwardPress()
                             }
                         )
                         .frame(width: 280, height: 300)
@@ -246,7 +246,7 @@ struct ContentView: View {
     
     private func handleRotation(_ direction: Int) {
         if currentDestination == .brick {
-            brickGameViewModel.movePaddle(delta: CGFloat(direction) * 0.05)
+            brickGameViewModel.movePaddle(delta: CGFloat(direction) * 0.08)
             return
         }
         
@@ -360,12 +360,39 @@ struct ContentView: View {
             }
         }
         
+        if currentDestination == .brick {
+            if !brickGameViewModel.isPaused {
+                brickGameViewModel.togglePause()
+                return
+            }
+        }
+        
         if !navigationStack.isEmpty {
             withAnimation {
                 navigationStack.removeLast()
                 selectedIndex = 0 
                 updateCount()
             }
+        }
+    }
+    
+    private func handlePlayPausePress() {
+        PlaybackManager.shared.togglePlayPause()
+    }
+    
+    private func handleForwardPress() {
+        if currentDestination == .brick {
+            brickGameViewModel.movePaddle(delta: 0.1)
+        } else {
+            PlaybackManager.shared.skipForward()
+        }
+    }
+    
+    private func handleBackwardPress() {
+        if currentDestination == .brick {
+            brickGameViewModel.movePaddle(delta: -0.1)
+        } else {
+            PlaybackManager.shared.skipBackward()
         }
     }
     
