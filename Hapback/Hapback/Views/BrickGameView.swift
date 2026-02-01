@@ -14,11 +14,13 @@ struct BrickGameView: View {
         VStack(spacing: 0) {
             // Header Bar
             HStack {
-                Text("Brick")
+                Text("Block Breaker")
                     .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.black)
                 Spacer()
                 Text("Score: \(viewModel.score)")
                     .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.black)
                 Spacer()
                 HStack(spacing: 2) {
                     ForEach(0..<viewModel.lives, id: \.self) { _ in

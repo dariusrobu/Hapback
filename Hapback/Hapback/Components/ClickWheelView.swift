@@ -77,9 +77,8 @@ struct ClickWheelView: View {
                     Button(action: {
                         onMenuPress?()
                     }) {
-                        Text("MENU")
-                            .font(.system(size: 14, weight: .bold))
-                            .kerning(2.0) // tracking-[0.2em]
+                        Image(systemName: "list.bullet")
+                            .font(.system(size: 20, weight: .bold))
                             .foregroundColor(iconColor)
                             .padding(.top, geometry.size.height * 0.1)
                             .contentShape(Rectangle())

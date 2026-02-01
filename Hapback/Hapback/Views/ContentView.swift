@@ -135,9 +135,11 @@ struct ContentView: View {
                     .font(.system(size: 20, weight: .bold))
                     .textCase(.uppercase)
                     .kerning(1.0)
+                    .foregroundColor(.black)
                 Spacer()
                 Image(systemName: "battery.100")
                     .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.black)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)

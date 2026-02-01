@@ -20,9 +20,11 @@ struct CalendarView: View {
                     .font(.system(size: 20, weight: .bold))
                     .textCase(.uppercase)
                     .kerning(1.0)
+                    .foregroundColor(.black)
                 Spacer()
                 Image(systemName: "battery.100")
                     .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.black)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -36,6 +38,7 @@ struct CalendarView: View {
             VStack(spacing: 16) {
                 Text(monthYearString(from: date))
                     .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.black)
                     .padding(.top, 20)
                 
                 let days = daysInMonth(for: date)

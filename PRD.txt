@@ -6,15 +6,15 @@ Status: Draft
 1. PRODUCT VISION
 To provide a focused, offline-first music experience that honors the tactile legacy of the 2000s. Hapback transforms the modern iPhone into a dedicated high-fidelity music player using a haptic-driven virtual click wheel.
 2. TARGET AUDIENCE
-Nostalgia Seekers: Users wanting to relive the physical sensation of the click-wheel era.
+Nostalgia Seekers: Users wanting to relive the sensation of the classic portable music era.
 Digital Minimalists: Users looking for a distraction-free, offline music environment.
 Audiophiles: Users who manage their own high-quality local file libraries (FLAC/ALAC).
 3. FUNCTIONAL REQUIREMENTS
-3.1 The Virtual Click Wheel
+3.1 The Virtual Control Wheel
 Rotary Tracking: The UI must track circular touch movements to scroll through lists.
-Haptic Mapping: Integration with the iOS Taptic Engine to provide a "click" sensation for every list item passed.
+Haptic Mapping: Integration with the iOS Taptic Engine to provide a tactile sensation for every list item passed.
 Button Quadrants:
-Menu: Navigates back one level.
+Menu/Back: Navigates back one level.
 Play/Pause: Global toggle for audio.
 Forward/Back: Track skipping or fast-forwarding on long-press.
 Center Select: Confirms selection or toggles "Scrub Mode" during playback.
@@ -42,9 +42,9 @@ Database
 Core Data (for music indexing)
 Export to Sheets
 5. USER INTERFACE (UI) DESIGN
-The "LCD" Screen: The top 40% of the app should mimic a classic display with a hierarchical menu system.
-The Wheel: The bottom 60% features the interactive wheel.
-Dynamic Themes: Support for "Classic White," "Stealth Black," and "U2 Red/Black" skins.
+The Display Area: The top 40% of the app features a hierarchical menu system.
+The Controls Area: The bottom 60% features the interactive control wheel.
+Dynamic Themes: Support for "Classic White," "Stealth Black," and "Vibrant Red" skins.
 6. CONSTRAINTS & COMPLIANCE
 Legal: The app will not provide music; it is a tool for playing user-owned files.
-IP Protection: UI design must remain distinct enough from Apple’s hardware "Trade Dress" to pass App Store Review 5.2.2.
+IP Protection: UI design must remain distinct enough from classic hardware designs to pass App Store Review 5.2.2.

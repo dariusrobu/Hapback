@@ -35,10 +35,12 @@ struct SongsView: View {
                     .font(.system(size: 20, weight: .bold))
                     .textCase(.uppercase)
                     .kerning(1.0)
+                    .foregroundColor(.black)
                 Spacer()
                 Image(systemName: "battery.100")
                     .font(.system(size: 20, weight: .bold))
                     .frame(width: 40, alignment: .trailing)
+                    .foregroundColor(.black)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)

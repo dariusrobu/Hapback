@@ -15,19 +15,12 @@ struct NowPlayingView: View {
         VStack(spacing: 0) {
             // Header Bar
             HStack {
-                Image(systemName: playbackManager.isPlaying ? "play.fill" : "pause.fill")
-                    .font(.system(size: 10))
-                    .frame(width: 20, alignment: .leading)
-                
                 Spacer()
                 Text("NOW PLAYING")
                     .font(.system(size: 14, weight: .bold))
                     .kerning(-0.5)
+                    .foregroundColor(.black)
                 Spacer()
-                
-                Image(systemName: "battery.75")
-                    .font(.system(size: 12))
-                    .frame(width: 20, alignment: .trailing)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
@@ -97,7 +90,7 @@ struct NowPlayingView: View {
                         .foregroundColor(.black.opacity(0.6))
                         .padding(.horizontal, 4)
                         
-                        DiamondSlider(progress: playbackManager.duration > 0 ? playbackManager.currentTime / playbackManager.duration : 0)
+                        RetroSlider(progress: playbackManager.duration > 0 ? playbackManager.currentTime / playbackManager.duration : 0)
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 20)
@@ -122,7 +115,7 @@ struct NowPlayingView: View {
     }
 }
 
-struct DiamondSlider: View {
+struct RetroSlider: View {
     var progress: Double // 0.0 to 1.0
     
     var body: some View {
@@ -147,14 +140,12 @@ struct DiamondSlider: View {
                     )
                     .frame(width: geometry.size.width * CGFloat(progress))
                 
-                // Diamond Handle
-                Rectangle()
+                // Handle
+                Circle()
                     .fill(Color(red: 58/255, green: 93/255, blue: 161/255))
                     .frame(width: 12, height: 12)
-                    .rotationEffect(.degrees(45))
                     .overlay(
-                        Rectangle()
-                            .rotation(Angle(degrees: 45))
+                        Circle()
                             .stroke(Color.black.opacity(0.3), lineWidth: 1)
                     )
                     .offset(x: (geometry.size.width * CGFloat(progress)) - 6)
