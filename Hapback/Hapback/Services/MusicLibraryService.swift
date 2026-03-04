@@ -11,6 +11,7 @@ import MediaPlayer
 @MainActor
 class MusicLibraryService {
     private let fileScanner = FileScannerService()
+    private let localPlaylistService = LocalPlaylistService()
     
     func requestAuthorization() async -> MPMediaLibraryAuthorizationStatus {
         return await MPMediaLibrary.requestAuthorization()
@@ -66,6 +67,7 @@ class MusicLibraryService {
     }
 
     func fetchPlaylists() async -> [Playlist] {
+        // System Playlists
         let query = MPMediaQuery.playlists()
         let collections = query.collections ?? []
         var playlists: [Playlist] = []
@@ -74,6 +76,14 @@ class MusicLibraryService {
                 playlists.append(Playlist(from: mediaPlaylist))
             }
         }
+        
+        // Local Playlists
+        // We need all songs to resolve references
+        let allSongs = await fetchSongs()
+        let localPlaylists = localPlaylistService.getLocalPlaylists(allSongs: allSongs)
+        
+        playlists.append(contentsOf: localPlaylists)
+        
         return playlists
     }
 

@@ -1,17 +1,17 @@
 # Hapback
 
-Hapback is a native iOS application built using **Swift** and **SwiftUI** that provides a focused, offline-first music experience. It honors the tactile legacy of the 2000s by transforming the modern iPhone into a dedicated high-fidelity music player using a haptic-driven virtual click wheel.
+Hapback is a native iOS application built using **Swift** and **SwiftUI** that provides a focused, offline-first music experience with a responsive, haptic-driven rotary interface for seamless navigation and control.
 
 ## 📱 Product Vision
 
-To provide a distraction-free, high-fidelity music environment for nostalgia seekers, digital minimalists, and audiophiles. Hapback focuses on playing user-owned local file libraries (MP3, AAC, ALAC, WAV, AIFF) with a unique tactile interface.
+To provide a distraction-free, high-fidelity music environment for audiophiles and music enthusiasts. Hapback focuses on playing user-owned local file libraries (MP3, AAC, ALAC, WAV, AIFF) with a modern, intuitive interface centered on tactile interaction.
 
 ## ✨ Key Features
 
-- **Virtual Click Wheel**: 
-  - Rotary tracking for list navigation.
-  - Haptic mapping via iOS Taptic Engine for a physical "click" sensation.
-  - Classic button quadrants: Menu, Play/Pause, Forward/Back, and Center Select.
+- **Rotary Control Interface**: 
+  - Smooth rotary tracking for intuitive list navigation.
+  - Haptic feedback via iOS Taptic Engine for responsive tactile interaction.
+  - Intuitive control buttons: Menu, Play/Pause, Forward/Back, and Center Select.
 - **Library Management**:
   - Offline-first: Files stored within the app sandbox.
   - Import from iOS Files App (Local/iCloud Drive).
@@ -20,10 +20,10 @@ To provide a distraction-free, high-fidelity music environment for nostalgia see
   - Support for high-quality formats (FLAC, ALAC, etc.).
   - Gapless playback for seamless transitions.
   - Background audio with Control Center and Lock Screen integration.
-- **Classic UI**:
-  - Top "LCD" screen mimicking classic displays.
-  - Interactive wheel taking up the bottom portion of the screen.
-  - Dynamic Themes (Classic White, Stealth Black, Special Edition Red/Black).
+- **Modern UI**:
+  - Responsive display screen with clean typography.
+  - Interactive rotary control taking up the bottom portion of the screen.
+  - Dynamic Themes (Midnight, Ocean, Sunset).
 
 ## 🛠 Technology Stack
 
@@ -37,7 +37,7 @@ To provide a distraction-free, high-fidelity music environment for nostalgia see
 ## 📂 Project Structure
 
 - `Hapback/Hapback/`: Main application source code.
-  - `Components/`: Reusable UI components like the `ClickWheelView`.
+  - `Components/`: Reusable UI components like the `RotaryControlView`.
   - `Models/`: Data models (Album, Artist, Song, etc.).
   - `Services/`: Logic for audio playback, haptics, and file scanning.
   - `Views/`: Application screens and navigation.

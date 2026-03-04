@@ -11,44 +11,30 @@ struct PlaylistsView: View {
     @Binding var selectedIndex: Int
     let playlists: [Playlist]
     
+    // Theme Colors
+    let chicagoFont = Font.system(size: 19, weight: .bold)
+    let primaryColor = Color(red: 0, green: 0, blue: 0.5) // Navy Blue
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Header Bar
-            HStack {
-                Spacer()
-                Text("Playlists")
-                    .font(.system(size: 20, weight: .bold)) // font-chicago approx
-                    .textCase(.uppercase)
-                    .kerning(1.0)
-                    .foregroundColor(.black)
-                Spacer()
-                Image(systemName: "battery.100")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.black)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color.clear)
-            .overlay(
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.1)),
-                alignment: .bottom
-            )
-            
             // List Content
             ScrollViewReader { proxy in
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         if playlists.isEmpty {
-                            Text("No Playlists Found")
-                                .font(.system(size: 19, weight: .bold))
-                                .foregroundColor(.black.opacity(0.5))
+                            Text("NO PLAYLISTS FOUND")
+                                .font(chicagoFont)
+                                .foregroundColor(.black.opacity(0.4))
                                 .padding(.top, 40)
                         } else {
                             ForEach(0..<playlists.count, id: \.self) { index in
-                                PlaylistListItem(playlist: playlists[index], isSelected: index == selectedIndex)
-                                    .id(index)
+                                PlaylistListItem(
+                                    playlist: playlists[index],
+                                    isSelected: index == selectedIndex,
+                                    chicagoFont: chicagoFont,
+                                    primaryColor: primaryColor
+                                )
+                                .id(index)
                             }
                         }
                     }
@@ -61,38 +47,34 @@ struct PlaylistsView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
     }
 }
 
 struct PlaylistListItem: View {
     let playlist: Playlist
     var isSelected: Bool = false
+    let chicagoFont: Font
+    let primaryColor: Color
     
     var body: some View {
         HStack {
             Text(playlist.title)
-                .font(.system(size: 19, weight: .bold)) // font-chicago
-                .kerning(-0.5)
-                .foregroundColor(isSelected ? .white : .black)
+                .font(chicagoFont)
                 .lineLimit(1)
             Spacer()
             Image(systemName: "chevron.right")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(isSelected ? .white : .black)
+                .font(.system(size: 12, weight: .bold))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(isSelected ? Color(red: 0, green: 0, blue: 132/255) : Color.clear) // #000084
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(Color.black.opacity(0.05)),
-            alignment: .bottom
-        )
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(isSelected ? primaryColor : Color.clear)
+        .foregroundColor(isSelected ? .white : .black)
+        .border(width: 1, edges: [.bottom], color: .black.opacity(0.05))
     }
 }
 
 #Preview {
     PlaylistsView(selectedIndex: .constant(0), playlists: [])
-        .background(Color(red: 216/255, green: 233/255, blue: 240/255))
 }
+

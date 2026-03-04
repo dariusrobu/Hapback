@@ -10,57 +10,43 @@ import SwiftUI
 struct StopwatchView: View {
     @ObservedObject var viewModel: StopwatchViewModel
     
+    // Theme Colors
+    let chicagoFont = Font.system(size: 19, weight: .bold)
+    let chicagoFontSmall = Font.system(size: 14, weight: .bold)
+    let chicagoFontLarge = Font.system(size: 54, weight: .bold)
+    let primaryColor = Color(red: 0, green: 0, blue: 0.5) // Navy Blue
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Header Bar
-            HStack {
-                Spacer()
-                Text("Stopwatch")
-                    .font(.system(size: 20, weight: .bold))
-                    .textCase(.uppercase)
-                    .kerning(1.0)
-                    .foregroundColor(.black)
-                Spacer()
-                Image(systemName: "battery.100")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.black)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .overlay(
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.1)),
-                alignment: .bottom
-            )
-            
             Spacer()
             
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 Text(viewModel.formattedTime)
-                    .font(.system(size: 64, weight: .bold, design: .monospaced))
+                    .font(chicagoFontLarge)
                     .foregroundColor(.black)
+                    .tracking(-1.0)
                 
                 Text(viewModel.isRunning ? "RUNNING" : "STOPPED")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(viewModel.isRunning ? .green : .red)
+                    .font(chicagoFont)
+                    .foregroundColor(viewModel.isRunning ? primaryColor : .black.opacity(0.4))
             }
             
             Spacer()
             
             VStack(spacing: 4) {
-                Text("Center: Start/Stop")
-                Text("Menu: Reset (if stopped)")
+                Text("CENTER TO START/STOP")
+                Text("MENU TO RESET")
             }
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(.black.opacity(0.4))
-            .padding(.bottom, 20)
+            .font(chicagoFontSmall)
+            .foregroundColor(.black.opacity(0.5))
+            .padding(.bottom, 32)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
     }
 }
 
 #Preview {
     StopwatchView(viewModel: StopwatchViewModel())
-        .background(Color(red: 216/255, green: 233/255, blue: 240/255))
 }
+

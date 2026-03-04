@@ -13,44 +13,30 @@ struct ArtistDetailView: View {
     @State private var albums: [Album] = []
     private let musicService = MusicLibraryService()
     
+    // Theme Colors
+    let chicagoFont = Font.system(size: 19, weight: .bold)
+    let primaryColor = Color(red: 0, green: 0, blue: 0.5) // Navy Blue
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Header Bar
-            HStack {
-                Spacer()
-                Text(artist.name)
-                    .font(.system(size: 20, weight: .bold))
-                    .textCase(.uppercase)
-                    .kerning(1.0)
-                    .foregroundColor(.black)
-                Spacer()
-                Image(systemName: "battery.100")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.black)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color.clear)
-            .overlay(
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.1)),
-                alignment: .bottom
-            )
-            
             // List Content
             ScrollViewReader { proxy in
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         if albums.isEmpty {
-                            Text("No Albums Found")
-                                .font(.system(size: 19, weight: .bold))
-                                .foregroundColor(.black.opacity(0.5))
+                            Text("NO ALBUMS FOUND")
+                                .font(chicagoFont)
+                                .foregroundColor(.black.opacity(0.4))
                                 .padding(.top, 40)
                         } else {
                             ForEach(0..<albums.count, id: \.self) { index in
-                                AlbumListItem(album: albums[index], isSelected: index == selectedIndex)
-                                    .id(index)
+                                AlbumListItem(
+                                    album: albums[index],
+                                    isSelected: index == selectedIndex,
+                                    chicagoFont: chicagoFont,
+                                    primaryColor: primaryColor
+                                )
+                                .id(index)
                             }
                         }
                     }
@@ -63,8 +49,10 @@ struct ArtistDetailView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
         .task {
             self.albums = await musicService.fetchAlbums(for: artist)
         }
     }
 }
+

@@ -11,97 +11,92 @@ import MediaPlayer
 struct NowPlayingView: View {
     @ObservedObject var playbackManager = PlaybackManager.shared
     
+    // Theme Colors (LCD Style)
+    let lcdTopColor = Color(red: 240/255, green: 248/255, blue: 1.0) // aliceblue
+    let lcdBottomColor = Color(red: 230/255, green: 240/255, blue: 1.0)
+    let primaryColor = Color(red: 0/255, green: 0/255, blue: 128/255) // Navy Blue
+    let chicagoFont = Font.system(size: 18, weight: .bold)
+    let chicagoFontSmall = Font.system(size: 14, weight: .bold)
+    
     var body: some View {
-        VStack(spacing: 0) {
-            // Header Bar
-            HStack {
-                Spacer()
-                Text("NOW PLAYING")
-                    .font(.system(size: 14, weight: .bold))
-                    .kerning(-0.5)
-                    .foregroundColor(.black)
-                Spacer()
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color.white.opacity(0.5))
-            .overlay(
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.15)),
-                alignment: .bottom
-            )
+        ZStack {
+            // Screen background gradient
+            LinearGradient(gradient: Gradient(colors: [lcdTopColor, lcdBottomColor]), startPoint: .top, endPoint: .bottom)
             
-            if let song = playbackManager.currentSong {
-                VStack(spacing: 20) {
-                    // Artwork and Metadata
-                    HStack(alignment: .center, spacing: 16) {
-                        // Album Artwork
+            VStack(spacing: 0) {
+                if let song = playbackManager.currentSong {
+                    VStack(spacing: 12) {
+                        // Artwork
                         if let image = song.artwork {
                             Image(uiImage: image)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 128, height: 128)
-                                .cornerRadius(2)
-                                .shadow(radius: 2)
+                                .frame(width: 140, height: 140)
+                                .clipShape(RoundedRectangle(cornerRadius: 2))
+                                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 3)
+                                .padding(.top, 16)
                         } else {
                             Rectangle()
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(width: 128, height: 128)
-                                .cornerRadius(2)
+                                .fill(Color.white.opacity(0.5))
+                                .frame(width: 140, height: 140)
+                                .clipShape(RoundedRectangle(cornerRadius: 2))
+                                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 3)
                                 .overlay(
                                     Image(systemName: "music.note")
-                                        .font(.system(size: 64))
-                                        .foregroundColor(.white)
+                                        .font(.system(size: 60))
+                                        .foregroundColor(primaryColor.opacity(0.3))
                                 )
+                                .padding(.top, 16)
                         }
                         
-                        VStack(alignment: .leading, spacing: 4) {
+                        // Metadata
+                        VStack(spacing: 4) {
                             Text(song.title)
-                                .font(.system(size: 20, weight: .bold))
+                                .font(chicagoFont)
                                 .foregroundColor(.black)
-                                .lineLimit(2)
+                                .lineLimit(1)
                             
                             Text(song.artist)
-                                .font(.system(size: 18, weight: .semibold))
+                                .font(chicagoFontSmall)
                                 .foregroundColor(.black.opacity(0.7))
                                 .lineLimit(1)
                             
                             Text(song.albumTitle)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.black.opacity(0.5))
+                                .font(chicagoFontSmall)
+                                .foregroundColor(.black.opacity(0.6))
                                 .lineLimit(1)
                         }
+                        .padding(.horizontal, 20)
+                        
+                        Spacer()
+                        
+                        // Progress Bar Area
+                        VStack(spacing: 6) {
+                            ClassicSlider(
+                                progress: playbackManager.duration > 0 ? playbackManager.currentTime / playbackManager.duration : 0,
+                                primaryColor: primaryColor
+                            )
+                            
+                            HStack {
+                                Text(formatTime(playbackManager.currentTime))
+                                Spacer()
+                                Text(formatTime(playbackManager.duration))
+                            }
+                            .font(chicagoFontSmall)
+                            .foregroundColor(.black.opacity(0.6))
+                            .padding(.horizontal, 4)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 24)
+                    }
+                } else {
+                    VStack {
+                        Spacer()
+                        Text("NO SONG PLAYING")
+                            .font(chicagoFont)
+                            .foregroundColor(primaryColor.opacity(0.4))
                         Spacer()
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 20)
-                    
-                    Spacer()
-                    
-                    // Progress Bar Area
-                    VStack(spacing: 8) {
-                        HStack {
-                            Text(formatTime(playbackManager.currentTime))
-                            Spacer()
-                            Text("-" + formatTime(playbackManager.duration - playbackManager.currentTime))
-                        }
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.black.opacity(0.6))
-                        .padding(.horizontal, 4)
-                        
-                        RetroSlider(progress: playbackManager.duration > 0 ? playbackManager.currentTime / playbackManager.duration : 0)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 20)
-                }
-            } else {
-                VStack {
-                    Spacer()
-                    Text("No Song Selected")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.black.opacity(0.5))
-                    Spacer()
                 }
             }
         }
@@ -115,47 +110,33 @@ struct NowPlayingView: View {
     }
 }
 
-struct RetroSlider: View {
+struct ClassicSlider: View {
     var progress: Double // 0.0 to 1.0
+    var primaryColor: Color
     
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 // Background
-                Rectangle()
+                RoundedRectangle(cornerRadius: 1)
                     .fill(Color.white)
+                    .frame(height: 14)
                     .overlay(
-                        Rectangle()
-                            .stroke(Color.black.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 1)
+                            .stroke(Color.black.opacity(0.1), lineWidth: 1)
                     )
                 
                 // Fill
-                Rectangle()
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color(red: 139/255, green: 168/255, blue: 204/255), Color(red: 90/255, green: 125/255, blue: 163/255)]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(width: geometry.size.width * CGFloat(progress))
-                
-                // Handle
-                Circle()
-                    .fill(Color(red: 58/255, green: 93/255, blue: 161/255))
-                    .frame(width: 12, height: 12)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.black.opacity(0.3), lineWidth: 1)
-                    )
-                    .offset(x: (geometry.size.width * CGFloat(progress)) - 6)
+                LinearGradient(gradient: Gradient(colors: [primaryColor.opacity(0.8), primaryColor]), startPoint: .top, endPoint: .bottom)
+                    .frame(width: geometry.size.width * CGFloat(progress), height: 14)
+                    .clipShape(RoundedRectangle(cornerRadius: 1))
             }
         }
-        .frame(height: 12)
+        .frame(height: 14)
     }
 }
 
 #Preview {
     NowPlayingView()
-        .background(Color(red: 216/255, green: 233/255, blue: 240/255))
 }
+

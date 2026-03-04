@@ -13,42 +13,25 @@ struct SettingsView: View {
     private let musicService = MusicLibraryService()
     private let scanner = FileScannerService()
     
+    // Theme Colors
+    let chicagoFont = Font.system(size: 19, weight: .bold)
+    let chicagoFontSmall = Font.system(size: 15, weight: .bold)
+    let primaryColor = Color(red: 0, green: 0, blue: 0.5) // Navy Blue
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Header Bar
-            HStack {
-                Spacer()
-                Text("Settings")
-                    .font(.system(size: 20, weight: .bold))
-                    .textCase(.uppercase)
-                    .kerning(1.0)
-                    .foregroundColor(.black)
-                Spacer()
-                Image(systemName: "battery.100")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.black)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color.clear)
-            .overlay(
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.1)),
-                alignment: .bottom
-            )
-            
             // Settings List
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    SettingsItem(label: "About", value: "Hapback v1.0")
-                    SettingsItem(label: "Songs", value: "\(songCount)")
-                    SettingsItem(label: "Capacity", value: storageUsed)
-                    SettingsItem(label: "Legal", value: "")
+                    SettingsItem(label: "About", value: "Hapback v1.0", chicagoFont: chicagoFont, chicagoFontSmall: chicagoFontSmall)
+                    SettingsItem(label: "Songs", value: "\(songCount)", chicagoFont: chicagoFont, chicagoFontSmall: chicagoFontSmall)
+                    SettingsItem(label: "Capacity", value: storageUsed, chicagoFont: chicagoFont, chicagoFontSmall: chicagoFontSmall)
+                    SettingsItem(label: "Legal", value: "", chicagoFont: chicagoFont, chicagoFontSmall: chicagoFontSmall)
                 }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
         .task {
             let songs = await musicService.fetchSongs()
             self.songCount = songs.count
@@ -69,31 +52,31 @@ struct SettingsView: View {
 struct SettingsItem: View {
     let label: String
     let value: String
+    let chicagoFont: Font
+    let chicagoFontSmall: Font
     
     var body: some View {
         HStack {
             Text(label)
-                .font(.system(size: 19, weight: .bold))
+                .font(chicagoFont)
                 .foregroundColor(.black)
-            Spacer()
-            Text(value)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.black.opacity(0.6))
             
-            if value.isEmpty {
+            Spacer()
+            
+            if !value.isEmpty {
+                Text(value)
+                    .font(chicagoFontSmall)
+                    .foregroundColor(.black.opacity(0.6))
+            } else {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.black.opacity(0.3))
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(Color.clear)
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(Color.black.opacity(0.05)),
-            alignment: .bottom
-        )
+        .border(width: 1, edges: [.bottom], color: .black.opacity(0.05))
     }
 }
+

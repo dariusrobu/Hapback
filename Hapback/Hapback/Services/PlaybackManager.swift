@@ -39,7 +39,7 @@ class PlaybackManager: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 print("DEBUG: Re-asserting audio session activity for background")
                 try? AVAudioSession.sharedInstance().setActive(true)
                 self?.updateNowPlayingInfo()
@@ -52,73 +52,62 @@ class PlaybackManager: ObservableObject {
         
         commandCenter.playCommand.isEnabled = true
         commandCenter.playCommand.addTarget { [weak self] event in
-            if let self = self {
-                Task { @MainActor in
-                    self.togglePlayPause()
-                }
-                return .success
+            Task { @MainActor [weak self] in
+                self?.togglePlayPause()
             }
-            return .commandFailed
+            return .success
         }
         
         commandCenter.pauseCommand.isEnabled = true
         commandCenter.pauseCommand.addTarget { [weak self] event in
-            if let self = self {
-                Task { @MainActor in
-                    self.pause()
-                }
-                return .success
+            Task { @MainActor [weak self] in
+                self?.pause()
             }
-            return .commandFailed
+            return .success
         }
         
         commandCenter.nextTrackCommand.isEnabled = true
         commandCenter.nextTrackCommand.addTarget { [weak self] event in
-            if let self = self {
-                Task { @MainActor in
-                    self.skipForward()
-                }
-                return .success
+            Task { @MainActor [weak self] in
+                self?.skipForward()
             }
-            return .commandFailed
+            return .success
         }
         
         commandCenter.previousTrackCommand.isEnabled = true
         commandCenter.previousTrackCommand.addTarget { [weak self] event in
-            if let self = self {
-                Task { @MainActor in
-                    self.skipBackward()
-                }
-                return .success
+            Task { @MainActor [weak self] in
+                self?.skipBackward()
             }
-            return .commandFailed
+            return .success
         }
     }
     
-        private func setupAudioSession() {
-            // Session is primarily managed by AppDelegate for early activation.
-            do {
-                let session = AVAudioSession.sharedInstance()
-                // Using .playback without specific options to ensure standard behavior
-                try session.setCategory(.playback, mode: .default, options: [.allowBluetoothA2DP, .allowAirPlay])
-                try session.setActive(true)
-                
-                // Listen for route changes (e.g., headphones plugged/unplugged)
-                NotificationCenter.default.addObserver(
-                    forName: AVAudioSession.routeChangeNotification,
-                    object: session,
-                    queue: .main
-                ) { notification in
-                    print("DEBUG: Audio route changed: \(notification.userInfo ?? [:])")
-                }
-                
-                UIApplication.shared.beginReceivingRemoteControlEvents()
-            } catch {
-                print("ERROR: Failed to refine audio session: \(error)")
+    private func setupAudioSession() {
+        // Session is primarily managed by AppDelegate for early activation.
+        do {
+            let session = AVAudioSession.sharedInstance()
+            // Using .playback without specific options to ensure standard behavior
+            try session.setCategory(.playback, mode: .default, options: [.allowBluetoothA2DP, .allowAirPlay])
+            try session.setActive(true)
+            
+            // Listen for route changes (e.g., headphones plugged/unplugged)
+            NotificationCenter.default.addObserver(
+                forName: AVAudioSession.routeChangeNotification,
+                object: session,
+                queue: .main
+            ) { notification in
+                print("DEBUG: Audio route changed: \(notification.userInfo ?? [:])")
             }
+            
+            UIApplication.shared.beginReceivingRemoteControlEvents()
+        } catch {
+            print("ERROR: Failed to refine audio session: \(error)")
         }
+    }
     
-        private func setupInterruptionObserver() {        NotificationCenter.default.addObserver(
+    private func setupInterruptionObserver() {
+        NotificationCenter.default.addObserver(
             forName: AVAudioSession.interruptionNotification,
             object: AVAudioSession.sharedInstance(),
             queue: .main
@@ -131,7 +120,9 @@ class PlaybackManager: ObservableObject {
             
             if type == .began {
                 // Interruption began, pause playback
-                self?.pause()
+                Task { @MainActor [weak self] in
+                    self?.pause()
+                }
             } else if type == .ended {
                 if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
                     let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
@@ -203,17 +194,22 @@ class PlaybackManager: ObservableObject {
         // Duration from media item if available, otherwise from asset
         if let mediaItem = song.mediaItem {
             duration = mediaItem.playbackDuration
+            self.updateNowPlayingInfo()
         } else {
             Task {
-                // Using explicit property reference to avoid ambiguity
-                let assetDuration = asset.duration
-                let seconds = CMTimeGetSeconds(assetDuration)
-                self.duration = seconds
-                self.updateNowPlayingInfo()
+                do {
+                    let assetDuration = try await asset.load(.duration)
+                    let seconds = CMTimeGetSeconds(assetDuration)
+                    self.duration = seconds
+                    self.updateNowPlayingInfo()
+                } catch {
+                    print("Error loading duration: \(error)")
+                }
             }
         }
         
-        updateNowPlayingInfo() // Call before play
+        // Call before play, will be updated again with duration
+        updateNowPlayingInfo()
         
         // Final session activation check
         try? AVAudioSession.sharedInstance().setActive(true)
@@ -229,8 +225,10 @@ class PlaybackManager: ObservableObject {
             object: playerItem,
             queue: .main
         ) { [weak self] _ in
-            print("DEBUG: Track ended, skipping forward")
-            self?.skipForward()
+            Task { @MainActor [weak self] in
+                print("DEBUG: Track ended, skipping forward")
+                self?.skipForward()
+            }
         }
     }
     
@@ -314,9 +312,9 @@ class PlaybackManager: ObservableObject {
     private func addTimeObserver() {
         let interval = CMTime(seconds: 1.0, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            guard let self = self else { return }
             // Ensure mutation happens on main actor
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
                 self.currentTime = time.seconds
                 
                 // Update system info center every 10 seconds to keep it fresh

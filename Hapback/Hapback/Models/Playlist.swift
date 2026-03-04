@@ -9,18 +9,23 @@ import Foundation
 import MediaPlayer
 
 struct Playlist: Identifiable {
-    let id: MPMediaEntityPersistentID
+    let id: String
     let title: String
     let isSmart: Bool
-    let items: [MPMediaItem]
+    let songs: [Song]
     
     @MainActor
     init(from mediaPlaylist: MPMediaPlaylist) {
-        self.id = mediaPlaylist.persistentID
+        self.id = String(mediaPlaylist.persistentID)
         self.title = mediaPlaylist.name ?? "Unknown Playlist"
-        // Check if it's a smart playlist. 
-        // MPMediaPlaylistAttributeSmart is bit 0.
         self.isSmart = mediaPlaylist.playlistAttributes.contains(.smart)
-        self.items = mediaPlaylist.items
+        self.songs = mediaPlaylist.items.map { Song(from: $0) }
+    }
+    
+    init(id: String, title: String, songs: [Song]) {
+        self.id = id
+        self.title = title
+        self.isSmart = false
+        self.songs = songs
     }
 }

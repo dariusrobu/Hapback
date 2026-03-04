@@ -11,7 +11,7 @@ Implement the "Extras" sub-menu for Hapback, featuring a suite of utility and en
     -   Calendars
 *   **Clock View:** 
     -   A dedicated screen displaying the current time and date in large, bold digital text.
-    -   Follows the iPod's high-contrast LCD aesthetic.
+    -   Features clear, high-contrast typography for easy visibility.
 *   **Stopwatch View:**
     -   A functional digital stopwatch.
     -   Controls: Center button to Start/Stop, Menu button to Reset (when paused).

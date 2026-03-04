@@ -43,8 +43,8 @@ Core Data (for music indexing)
 Export to Sheets
 5. USER INTERFACE (UI) DESIGN
 The Display Area: The top 40% of the app features a hierarchical menu system.
-The Controls Area: The bottom 60% features the interactive control wheel.
-Dynamic Themes: Support for "Classic White," "Stealth Black," and "Vibrant Red" skins.
+The Controls Area: The bottom 60% features the interactive rotary control.
+Dynamic Themes: Support for "Midnight," "Ocean," and "Sunset" skins with modern color palettes.
 6. CONSTRAINTS & COMPLIANCE
 Legal: The app will not provide music; it is a tool for playing user-owned files.
-IP Protection: UI design must remain distinct enough from classic hardware designs to pass App Store Review 5.2.2.
+IP Protection: UI design incorporates original design elements distinct from other products.

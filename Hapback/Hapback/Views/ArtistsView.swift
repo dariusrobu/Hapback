@@ -11,44 +11,30 @@ struct ArtistsView: View {
     @Binding var selectedIndex: Int
     let artists: [Artist]
     
+    // Theme Colors
+    let chicagoFont = Font.system(size: 19, weight: .bold)
+    let primaryColor = Color(red: 0, green: 0, blue: 0.5) // Navy Blue
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Header Bar
-            HStack {
-                Spacer()
-                Text("Artists")
-                    .font(.system(size: 20, weight: .bold)) // font-chicago approx
-                    .textCase(.uppercase)
-                    .kerning(1.0)
-                    .foregroundColor(.black)
-                Spacer()
-                Image(systemName: "battery.100")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.black)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color.clear)
-            .overlay(
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.1)),
-                alignment: .bottom
-            )
-            
             // List Content
             ScrollViewReader { proxy in
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         if artists.isEmpty {
-                            Text("No Artists Found")
-                                .font(.system(size: 19, weight: .bold))
-                                .foregroundColor(.black.opacity(0.5))
+                            Text("NO ARTISTS FOUND")
+                                .font(chicagoFont)
+                                .foregroundColor(.black.opacity(0.4))
                                 .padding(.top, 40)
                         } else {
                             ForEach(0..<artists.count, id: \.self) { index in
-                                ArtistListItem(artist: artists[index], isSelected: index == selectedIndex)
-                                    .id(index)
+                                ArtistListItem(
+                                    artist: artists[index],
+                                    isSelected: index == selectedIndex,
+                                    chicagoFont: chicagoFont,
+                                    primaryColor: primaryColor
+                                )
+                                .id(index)
                             }
                         }
                     }
@@ -61,38 +47,34 @@ struct ArtistsView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
     }
 }
 
 struct ArtistListItem: View {
     let artist: Artist
     var isSelected: Bool = false
+    let chicagoFont: Font
+    let primaryColor: Color
     
     var body: some View {
         HStack {
             Text(artist.name)
-                .font(.system(size: 19, weight: .bold)) // font-chicago
-                .kerning(-0.5)
-                .foregroundColor(isSelected ? .white : .black)
+                .font(chicagoFont)
                 .lineLimit(1)
             Spacer()
             Image(systemName: "chevron.right")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(isSelected ? .white : .black)
+                .font(.system(size: 12, weight: .bold))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(isSelected ? Color(red: 0, green: 0, blue: 128/255) : Color.clear) // #000080
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(Color.black.opacity(0.05)),
-            alignment: .bottom
-        )
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(isSelected ? primaryColor : Color.clear)
+        .foregroundColor(isSelected ? .white : .black)
+        .border(width: 1, edges: [.bottom], color: .black.opacity(0.05))
     }
 }
 
 #Preview {
     ArtistsView(selectedIndex: .constant(0), artists: [])
-        .background(Color(red: 216/255, green: 233/255, blue: 240/255))
 }
+

@@ -1,7 +1,7 @@
 # Specification: Classic Albums Implementation
 
 ## Overview
-Implement the "Albums" view for Hapback, strictly adhering to the classic iPod design patterns. This view allows users to browse their music collection by album, fetched from the system library using the virtual click wheel for navigation.
+Implement the "Albums" view for Hapback with a modern, responsive design. This view allows users to browse their music collection by album, fetched from the system library using the rotary control interface for intuitive navigation.
 
 ## Functional Requirements
 *   **System Integration:** Use `MediaPlayer` to fetch all available albums from the user's iOS Music Library.

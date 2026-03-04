@@ -12,45 +12,29 @@ struct ClockView: View {
     @State private var currentTime = Date()
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
+    // Theme Colors
+    let chicagoFont = Font.system(size: 19, weight: .bold)
+    let chicagoFontLarge = Font.system(size: 64, weight: .bold)
+    let primaryColor = Color(red: 0, green: 0, blue: 0.5) // Navy Blue
+    
     var body: some View {
-        VStack(spacing: 20) {
-            // Header Bar
-            HStack {
-                Spacer()
-                Text("Clock")
-                    .font(.system(size: 20, weight: .bold))
-                    .textCase(.uppercase)
-                    .kerning(1.0)
-                    .foregroundColor(.black)
-                Spacer()
-                Image(systemName: "battery.100")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.black)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .overlay(
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.1)),
-                alignment: .bottom
-            )
-            
+        VStack(spacing: 0) {
             Spacer()
             
             VStack(spacing: 8) {
                 Text(timeString(from: currentTime))
-                    .font(.system(size: 64, weight: .bold, design: .monospaced))
+                    .font(chicagoFontLarge)
                     .foregroundColor(.black)
                 
-                Text(dateString(from: currentTime))
-                    .font(.system(size: 24, weight: .bold))
+                Text(dateString(from: currentTime).uppercased())
+                    .font(chicagoFont)
                     .foregroundColor(.black.opacity(0.6))
             }
             
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
         .onReceive(timer) { input in
             currentTime = input
         }
@@ -58,18 +42,18 @@ struct ClockView: View {
     
     private func timeString(from date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.timeStyle = .medium
+        formatter.timeStyle = .short
         return formatter.string(from: date)
     }
     
     private func dateString(from date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .full
+        formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
 }
 
 #Preview {
     ClockView()
-        .background(Color(red: 216/255, green: 233/255, blue: 240/255))
 }
+

@@ -13,7 +13,7 @@ class StopwatchViewModel: ObservableObject {
     @Published var time: TimeInterval = 0
     @Published var isRunning = false
     
-    private var timer: Timer?
+    private var timerTask: Task<Void, Never>?
     private var startTime: Date?
     private var accumulatedTime: TimeInterval = 0
     
@@ -29,10 +29,17 @@ class StopwatchViewModel: ObservableObject {
         guard !isRunning else { return }
         isRunning = true
         startTime = Date()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { [weak self] _ in
-            guard let self = self, let start = self.startTime else { return }
-            Task { @MainActor in
-                self.time = self.accumulatedTime + Date().timeIntervalSince(start)
+        
+        // Cancel existing task if any
+        timerTask?.cancel()
+        
+        timerTask = Task {
+            while !Task.isCancelled {
+                if let start = self.startTime {
+                    self.time = self.accumulatedTime + Date().timeIntervalSince(start)
+                }
+                // Update roughly every 0.01 seconds
+                try? await Task.sleep(nanoseconds: 10_000_000)
             }
         }
     }
@@ -43,8 +50,8 @@ class StopwatchViewModel: ObservableObject {
         if let start = startTime {
             accumulatedTime += Date().timeIntervalSince(start)
         }
-        timer?.invalidate()
-        timer = nil
+        timerTask?.cancel()
+        timerTask = nil
     }
     
     func reset() {

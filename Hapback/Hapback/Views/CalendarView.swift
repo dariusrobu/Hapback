@@ -11,66 +11,50 @@ struct CalendarView: View {
     let date = Date()
     let calendar = Calendar.current
     
+    // Theme Colors
+    let chicagoFont = Font.system(size: 19, weight: .bold)
+    let chicagoFontSmall = Font.system(size: 14, weight: .bold)
+    let primaryColor = Color(red: 0, green: 0, blue: 0.5) // Navy Blue
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Header Bar
-            HStack {
-                Spacer()
-                Text("Calendar")
-                    .font(.system(size: 20, weight: .bold))
-                    .textCase(.uppercase)
-                    .kerning(1.0)
+            VStack(spacing: 12) {
+                Text(monthYearString(from: date).uppercased())
+                    .font(chicagoFont)
                     .foregroundColor(.black)
-                Spacer()
-                Image(systemName: "battery.100")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.black)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .overlay(
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color.black.opacity(0.1)),
-                alignment: .bottom
-            )
-            
-            VStack(spacing: 16) {
-                Text(monthYearString(from: date))
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.black)
-                    .padding(.top, 20)
+                    .padding(.top, 24)
                 
                 let days = daysInMonth(for: date)
                 let firstDay = firstWeekdayOfMonth(for: date)
                 let columns = Array(repeating: GridItem(.flexible()), count: 7)
                 
-                LazyVGrid(columns: columns, spacing: 10) {
+                LazyVGrid(columns: columns, spacing: 8) {
                     ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { day in
                         Text(day)
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.black.opacity(0.5))
+                            .font(chicagoFontSmall)
+                            .foregroundColor(.black.opacity(0.4))
                     }
                     
-                    ForEach(0..<firstDay-1, id: \.self) { _ in
+                    ForEach(0..<max(0, firstDay-1), id: \.self) { _ in
                         Text("")
                     }
                     
                     ForEach(1...days, id: \.self) { day in
                         Text("\(day)")
-                            .font(.system(size: 18, weight: isToday(day) ? .black : .bold))
+                            .font(chicagoFontSmall)
                             .foregroundColor(isToday(day) ? .white : .black)
-                            .frame(width: 30, height: 30)
-                            .background(isToday(day) ? Color(red: 0, green: 0, blue: 128/255) : Color.clear)
-                            .clipShape(Circle())
+                            .frame(width: 28, height: 28)
+                            .background(isToday(day) ? primaryColor : Color.clear)
+                            .clipShape(RoundedRectangle(cornerRadius: 2))
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 16)
             }
             
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
     }
     
     private func monthYearString(from date: Date) -> String {
@@ -97,5 +81,5 @@ struct CalendarView: View {
 
 #Preview {
     CalendarView()
-        .background(Color(red: 216/255, green: 233/255, blue: 240/255))
 }
+
